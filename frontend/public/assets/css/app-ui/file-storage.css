@@ -1,0 +1,15 @@
+.storage-dropzone {
+  border: 2px dashed var(--bs-border-color);
+  border-radius: 1rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  background-color: var(--bs-tertiary-bg);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.storage-dropzone:hover {
+  border-color: var(--bs-primary);
+  background-color: var(--bs-primary-bg-subtle);
+}
+

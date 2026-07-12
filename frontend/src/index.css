@@ -1,11 +1,17 @@
 @import '../transitops/assets/bootstrap/css/bootstrap.min.css';
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
 :root {
-  font-family: 'Geist', 'Segoe UI', sans-serif;
+  --font-display: 'Geist', 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  font-family: var(--font-display);
   line-height: 1.5;
   font-weight: 400;
-  color: #10233d;
-  background: #f6f9ff;
+  color: var(--text-primary);
+  background: #f8fafc;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -24,7 +30,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #f6f9ff;
+  background: #f8fafc;
+  color: var(--text-primary);
 }
 
 button,
@@ -39,4 +46,9 @@ img {
 
 #root {
   min-height: 100vh;
+}
+
+::selection {
+  background: rgba(212, 153, 62, 0.26);
+  color: #111827;
 }

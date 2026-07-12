@@ -1,0 +1,37 @@
+.credit-card-visual {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  aspect-ratio: 1.58 / 1;
+}
+
+.credit-card-visual::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 50%;
+}
+
+.chip-icon {
+  width: 40px;
+  height: 30px;
+  background: linear-gradient(135deg, #d4af37 0%, #f1c40f 100%);
+  border-radius: 4px;
+}
+
+.card-number {
+  letter-spacing: 2px;
+}
+
+.action-icon-circle {
+  width: 48px;
+  height: 48px;
+  transition: transform 0.2s;
+}
+
+.action-icon-circle:hover {
+  transform: translateY(-3px);
+}
+

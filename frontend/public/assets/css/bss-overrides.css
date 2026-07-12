@@ -1,0 +1,35 @@
+.aspect-ratio-21x9 {
+  aspect-ratio: 21/9;
+}
+
+.aspect-ratio-16x9 {
+  aspect-ratio: 16/9;
+}
+
+.aspect-ratio-1x1 {
+  aspect-ratio: 1/1;
+}
+
+.swiper-vertical {
+  max-height: 100vh;
+}
+
+.swiper-nav-standalone .swiper-button-prev, .swiper-nav-standalone .swiper-button-next {
+  position: relative;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  width: auto;
+  height: auto;
+  margin: 0;
+}
+
+.swiper-nav-standalone .swiper-button-prev:after, .swiper-nav-standalone .swiper-button-next:after {
+  content: "";
+}
+
+.swiper-nav-custom .swiper-button-prev:after, .swiper-nav-custom .swiper-button-next:after {
+  content: "";
+}
+
