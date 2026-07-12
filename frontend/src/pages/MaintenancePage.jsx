@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { authFetch } from '../api.js';
 
 const STATUS_COLORS = {
@@ -19,6 +19,7 @@ export default function MaintenancePage() {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [filters, setFilters] = useState({ search: '', status: '', sort: 'scheduled_date' });
 
     const fetchLogs = async () => {
         try {
@@ -97,6 +98,18 @@ export default function MaintenancePage() {
         }
     };
 
+    const visibleLogs = useMemo(() => {
+        const needle = filters.search.trim().toLowerCase();
+        return [...logs]
+            .filter((log) => !filters.status || log.status === filters.status)
+            .filter((log) => !needle || [log.registration_number, log.description, log.status].join(' ').toLowerCase().includes(needle))
+            .sort((a, b) => {
+                if (filters.sort === 'cost') return Number(b.cost || 0) - Number(a.cost || 0);
+                if (filters.sort === 'status') return String(a.status).localeCompare(String(b.status));
+                return String(b.scheduled_date || '').localeCompare(String(a.scheduled_date || ''));
+            });
+    }, [logs, filters]);
+
     return (
         <div>
             <div className="d-flex justify-content-between align-items-center mb-4">
@@ -150,8 +163,13 @@ export default function MaintenancePage() {
 
                 <div className="col-12 col-xl-8">
                     <div className="card border-0 shadow-sm h-100">
-                        <div className="card-header bg-transparent border-0 pt-4 pb-0">
-                            <h5 className="fw-bold mb-0">All Maintenance Records</h5>
+                        <div className="card-header bg-transparent border-0 pt-4">
+                            <div className="row g-2 align-items-center">
+                                <div className="col-md-4"><h5 className="fw-bold mb-0">All Maintenance Records</h5></div>
+                                <div className="col-md-3"><input className="form-control" placeholder="Search maintenance" value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} /></div>
+                                <div className="col-md-2"><select className="form-select" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}><option value="">Status</option><option value="OPEN">Open</option><option value="IN_PROGRESS">In Progress</option><option value="CLOSED">Closed</option></select></div>
+                                <div className="col-md-3"><select className="form-select" value={filters.sort} onChange={(e) => setFilters({ ...filters, sort: e.target.value })}><option value="scheduled_date">Scheduled date</option><option value="status">Status</option><option value="cost">Cost</option></select></div>
+                            </div>
                         </div>
                         <div className="card-body">
                             <div className="table-responsive">
@@ -168,7 +186,7 @@ export default function MaintenancePage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {logs.map((log) => (
+                                        {visibleLogs.map((log) => (
                                             <tr key={log.maintenance_id}>
                                                 <td><span className="fw-medium">{log.registration_number || '—'}</span></td>
                                                 <td>{log.description}</td>

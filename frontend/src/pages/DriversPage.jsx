@@ -115,8 +115,8 @@ export default function DriversPage() {
     const sendReminders = async () => {
         const res = await authFetch('/api/reminders/license-expiry/send', { method: 'POST' });
         const data = await res.json();
-        if (res.ok) alert(`${data.reminders.length} reminder payloads prepared.`);
-        else setError(data.error || 'Failed to prepare reminders.');
+        if (res.ok) alert(data.message || `${data.reminderCount || data.reminders.length} reminder email sent.`);
+        else setError(data.error || 'Failed to send reminders.');
     };
 
     const isExpired = (date) => new Date(date) < new Date(new Date().toISOString().slice(0, 10));
@@ -162,7 +162,7 @@ export default function DriversPage() {
                 <div className="card border-0 shadow-sm mt-4">
                     <div className="card-header bg-transparent border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
                         <h5 className="fw-bold mb-0">License Reminders</h5>
-                        <button className="btn btn-sm btn-outline-primary" onClick={sendReminders}>Prepare</button>
+                        <button className="btn btn-sm btn-outline-primary" onClick={sendReminders}>Send Email</button>
                     </div>
                     <div className="card-body">
                         {reminders.length === 0 ? <p className="text-muted small mb-0">No licenses expiring in the next 30 days.</p> : reminders.map((r) => (

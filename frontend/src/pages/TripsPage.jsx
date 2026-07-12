@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { authFetch } from '../api.js';
 
 const STATUS_COLORS = {
@@ -12,6 +12,9 @@ export default function TripsPage() {
     const [trips, setTrips] = useState([]);
     const [vehicles, setVehicles] = useState([]);
     const [drivers, setDrivers] = useState([]);
+    const [filters, setFilters] = useState({ search: '', status: '', sort: 'created_at' });
+    const [completingTrip, setCompletingTrip] = useState(null);
+    const [completionForm, setCompletionForm] = useState({ actual_distance_km: '', fuel_consumed_l: '', end_odometer_km: '', revenue: '' });
     const [formData, setFormData] = useState({
         source: '',
         destination: '',
@@ -110,27 +113,55 @@ export default function TripsPage() {
         }
     };
 
-    const handleComplete = async (tripId) => {
-        const dist = prompt('Actual distance (km):');
-        const fuel = prompt('Fuel consumed (liters):');
-        const odo = prompt('End odometer (km):');
-        const revenue = prompt('Revenue (optional):');
-        if (!dist || !fuel || !odo) return;
+    const startComplete = (trip) => {
+        setCompletingTrip(trip);
+        setCompletionForm({
+            actual_distance_km: trip.actual_distance_km || trip.planned_distance_km || '',
+            fuel_consumed_l: trip.fuel_consumed_l || '',
+            end_odometer_km: '',
+            revenue: trip.revenue || '',
+        });
+    };
+
+    const submitComplete = async (e) => {
+        e.preventDefault();
+        if (!completingTrip) return;
         try {
-            const res = await authFetch(`/api/trips/${tripId}/status`, {
+            const res = await authFetch(`/api/trips/${completingTrip.trip_id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'COMPLETED', actual_distance_km: Number(dist), fuel_consumed_l: Number(fuel), end_odometer_km: Number(odo), revenue: Number(revenue || 0) })
+                body: JSON.stringify({
+                    status: 'COMPLETED',
+                    actual_distance_km: Number(completionForm.actual_distance_km),
+                    fuel_consumed_l: Number(completionForm.fuel_consumed_l),
+                    end_odometer_km: Number(completionForm.end_odometer_km),
+                    revenue: Number(completionForm.revenue || 0)
+                })
             });
             if (!res.ok) {
                 const data = await res.json();
                 alert(data.error || 'Failed to complete');
+            } else {
+                setCompletingTrip(null);
+                setCompletionForm({ actual_distance_km: '', fuel_consumed_l: '', end_odometer_km: '', revenue: '' });
             }
             fetchTrips();
         } catch (err) {
             console.error(err);
         }
     };
+
+    const visibleTrips = useMemo(() => {
+        const needle = filters.search.trim().toLowerCase();
+        return [...trips]
+            .filter((trip) => !filters.status || trip.status === filters.status)
+            .filter((trip) => !needle || [trip.source, trip.destination, trip.registration_number, trip.driver_name, trip.status].join(' ').toLowerCase().includes(needle))
+            .sort((a, b) => {
+                if (filters.sort === 'planned_distance_km') return Number(b.planned_distance_km || 0) - Number(a.planned_distance_km || 0);
+                if (filters.sort === 'status') return String(a.status).localeCompare(String(b.status));
+                return String(b.created_at || '').localeCompare(String(a.created_at || ''));
+            });
+    }, [trips, filters]);
 
     const handleCancel = async (tripId) => {
         if (!confirm('Cancel this trip?')) return;
@@ -212,9 +243,45 @@ export default function TripsPage() {
                 </div>
 
                 <div className="col-12 col-xl-8">
+                    {completingTrip && (
+                        <div className="card border-0 shadow-sm mb-4">
+                            <div className="card-header bg-transparent border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                                <h5 className="fw-bold mb-0">Complete Trip: {completingTrip.source} to {completingTrip.destination}</h5>
+                                <button className="btn btn-sm btn-outline-secondary" type="button" onClick={() => setCompletingTrip(null)}>Cancel</button>
+                            </div>
+                            <div className="card-body">
+                                <form className="row g-3" onSubmit={submitComplete}>
+                                    <div className="col-md-3">
+                                        <label className="form-label text-muted small fw-bold">Actual Distance (km)</label>
+                                        <input type="number" className="form-control" value={completionForm.actual_distance_km} onChange={(e) => setCompletionForm({ ...completionForm, actual_distance_km: e.target.value })} min="0" step="0.01" required />
+                                    </div>
+                                    <div className="col-md-3">
+                                        <label className="form-label text-muted small fw-bold">Fuel Consumed (L)</label>
+                                        <input type="number" className="form-control" value={completionForm.fuel_consumed_l} onChange={(e) => setCompletionForm({ ...completionForm, fuel_consumed_l: e.target.value })} min="0" step="0.01" required />
+                                    </div>
+                                    <div className="col-md-3">
+                                        <label className="form-label text-muted small fw-bold">End Odometer</label>
+                                        <input type="number" className="form-control" value={completionForm.end_odometer_km} onChange={(e) => setCompletionForm({ ...completionForm, end_odometer_km: e.target.value })} min="0" step="0.01" required />
+                                    </div>
+                                    <div className="col-md-3">
+                                        <label className="form-label text-muted small fw-bold">Revenue (₹)</label>
+                                        <input type="number" className="form-control" value={completionForm.revenue} onChange={(e) => setCompletionForm({ ...completionForm, revenue: e.target.value })} min="0" step="0.01" />
+                                    </div>
+                                    <div className="col-12">
+                                        <button className="btn btn-success" type="submit">Complete Trip</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
                     <div className="card border-0 shadow-sm h-100">
-                        <div className="card-header bg-transparent border-0 pt-4 pb-0">
-                            <h5 className="fw-bold mb-0">All Trips</h5>
+                        <div className="card-header bg-transparent border-0 pt-4">
+                            <div className="row g-2 align-items-center">
+                                <div className="col-md-4"><h5 className="fw-bold mb-0">All Trips</h5></div>
+                                <div className="col-md-3"><input className="form-control" placeholder="Search trips" value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} /></div>
+                                <div className="col-md-2"><select className="form-select" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}><option value="">Status</option><option value="DRAFT">Draft</option><option value="DISPATCHED">Dispatched</option><option value="COMPLETED">Completed</option><option value="CANCELLED">Cancelled</option></select></div>
+                                <div className="col-md-3"><select className="form-select" value={filters.sort} onChange={(e) => setFilters({ ...filters, sort: e.target.value })}><option value="created_at">Newest first</option><option value="status">Status</option><option value="planned_distance_km">Distance</option></select></div>
+                            </div>
                         </div>
                         <div className="card-body">
                             <div className="table-responsive">
@@ -231,7 +298,7 @@ export default function TripsPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {trips.map((t) => (
+                                        {visibleTrips.map((t) => (
                                             <tr key={t.trip_id}>
                                                 <td>{t.source}</td>
                                                 <td>{t.destination}</td>
@@ -249,7 +316,7 @@ export default function TripsPage() {
                                                     )}
                                                     {t.status === 'DISPATCHED' && (
                                                         <>
-                                                            <button className="btn btn-sm btn-outline-success me-1" onClick={() => handleComplete(t.trip_id)}>Complete</button>
+                                                            <button className="btn btn-sm btn-outline-success me-1" onClick={() => startComplete(t)}>Complete</button>
                                                             <button className="btn btn-sm btn-outline-danger" onClick={() => handleCancel(t.trip_id)}>Cancel</button>
                                                         </>
                                                     )}

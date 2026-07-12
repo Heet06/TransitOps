@@ -1,4 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const ROLE_LABELS = {
@@ -13,6 +14,16 @@ const ROLE_LABELS = {
 export default function Layout() {
   const location = useLocation();
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('transitops_theme') || 'light';
+    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+  }, []);
+
+  const setTheme = (theme) => {
+    localStorage.setItem('transitops_theme', theme);
+    document.documentElement.setAttribute('data-bs-theme', theme);
+  };
 
   const navItems = [
     { id: '/', label: 'Dashboard', roles: ['ADMIN', 'FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER', 'FINANCIAL_ANALYST', 'DRIVER'] },
@@ -73,8 +84,8 @@ export default function Layout() {
                             <div className="dropdown theme-switcher">
                                 <button className="btn btn-link dropdown-toggle px-2" data-bs-toggle="dropdown" aria-expanded="false" type="button">Theme</button>
                                 <div className="dropdown-menu dropdown-menu-end">
-                                    <button className="dropdown-item" type="button" onClick={() => document.documentElement.setAttribute('data-bs-theme', 'light')}>Light</button>
-                                    <button className="dropdown-item" type="button" onClick={() => document.documentElement.setAttribute('data-bs-theme', 'dark')}>Dark</button>
+                                    <button className="dropdown-item" type="button" onClick={() => setTheme('light')}>Light</button>
+                                    <button className="dropdown-item" type="button" onClick={() => setTheme('dark')}>Dark</button>
                                 </div>
                             </div>
                             <div className="dropdown">

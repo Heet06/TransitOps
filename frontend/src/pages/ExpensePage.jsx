@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { authFetch } from '../api.js';
 
 const EXPENSE_TYPES = ['MAINTENANCE', 'TOLL', 'INSURANCE', 'OTHER'];
@@ -11,6 +11,7 @@ export default function ExpensePage() {
     const [expenseForm, setExpenseForm] = useState({ vehicle_id: '', trip_id: '', expense_type: 'TOLL', amount: '', expense_date: new Date().toISOString().split('T')[0], notes: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [filters, setFilters] = useState({ vehicle_id: '', expense_type: '', fuelSort: 'log_date', expenseSort: 'expense_date' });
 
     const fetchData = async () => {
         const [expRes, fuelRes, vehRes] = await Promise.all([
@@ -75,6 +76,13 @@ export default function ExpensePage() {
     const fuelSpend = fuelLogs.reduce((sum, e) => sum + parseFloat(e.cost || 0), 0);
     const expenseSpend = expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
     const fuelLiters = fuelLogs.reduce((sum, e) => sum + parseFloat(e.liters || 0), 0);
+    const visibleFuelLogs = useMemo(() => [...fuelLogs]
+        .filter((log) => !filters.vehicle_id || log.vehicle_id === filters.vehicle_id)
+        .sort((a, b) => filters.fuelSort === 'cost' ? Number(b.cost || 0) - Number(a.cost || 0) : String(b.log_date || '').localeCompare(String(a.log_date || ''))), [fuelLogs, filters]);
+    const visibleExpenses = useMemo(() => [...expenses]
+        .filter((expense) => !filters.vehicle_id || expense.vehicle_id === filters.vehicle_id)
+        .filter((expense) => !filters.expense_type || expense.expense_type === filters.expense_type)
+        .sort((a, b) => filters.expenseSort === 'amount' ? Number(b.amount || 0) - Number(a.amount || 0) : String(b.expense_date || '').localeCompare(String(a.expense_date || ''))), [expenses, filters]);
 
     return (
         <div>
@@ -125,11 +133,21 @@ export default function ExpensePage() {
 
                 <div className="col-12 col-xl-8">
                     <div className="card border-0 shadow-sm mb-4">
+                        <div className="card-body">
+                            <div className="row g-2">
+                                <div className="col-md-4"><select className="form-select" value={filters.vehicle_id} onChange={(e) => setFilters({ ...filters, vehicle_id: e.target.value })}><option value="">All vehicles</option>{vehicles.map(v => <option key={v.vehicle_id} value={v.vehicle_id}>{v.registration_number}</option>)}</select></div>
+                                <div className="col-md-3"><select className="form-select" value={filters.expense_type} onChange={(e) => setFilters({ ...filters, expense_type: e.target.value })}><option value="">Expense type</option>{EXPENSE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select></div>
+                                <div className="col-md-2"><select className="form-select" value={filters.fuelSort} onChange={(e) => setFilters({ ...filters, fuelSort: e.target.value })}><option value="log_date">Fuel date</option><option value="cost">Fuel cost</option></select></div>
+                                <div className="col-md-3"><select className="form-select" value={filters.expenseSort} onChange={(e) => setFilters({ ...filters, expenseSort: e.target.value })}><option value="expense_date">Expense date</option><option value="amount">Expense amount</option></select></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="card border-0 shadow-sm mb-4">
                         <div className="card-header bg-transparent border-0 pt-4 pb-0"><h5 className="fw-bold mb-0">Fuel Logs</h5></div>
                         <div className="card-body table-responsive">
                             <table className="table table-hover align-middle">
                                 <thead className="table-light"><tr><th>Vehicle</th><th>Liters</th><th>Cost</th><th>Date</th><th></th></tr></thead>
-                                <tbody>{fuelLogs.map(f => <tr key={f.fuel_log_id}><td>{f.registration_number || '-'}</td><td>{Number(f.liters).toLocaleString()} L</td><td>₹{Number(f.cost).toLocaleString()}</td><td>{new Date(f.log_date).toLocaleDateString()}</td><td className="text-end"><button className="btn btn-sm btn-outline-danger" onClick={() => remove(`/api/fuel-logs/${f.fuel_log_id}`)}>Delete</button></td></tr>)}</tbody>
+                                <tbody>{visibleFuelLogs.map(f => <tr key={f.fuel_log_id}><td>{f.registration_number || '-'}</td><td>{Number(f.liters).toLocaleString()} L</td><td>₹{Number(f.cost).toLocaleString()}</td><td>{new Date(f.log_date).toLocaleDateString()}</td><td className="text-end"><button className="btn btn-sm btn-outline-danger" onClick={() => remove(`/api/fuel-logs/${f.fuel_log_id}`)}>Delete</button></td></tr>)}</tbody>
                             </table>
                         </div>
                     </div>
@@ -139,7 +157,7 @@ export default function ExpensePage() {
                         <div className="card-body table-responsive">
                             <table className="table table-hover align-middle">
                                 <thead className="table-light"><tr><th>Vehicle</th><th>Type</th><th>Amount</th><th>Date</th><th>Notes</th><th></th></tr></thead>
-                                <tbody>{expenses.map(e => <tr key={e.expense_id}><td>{e.registration_number || '-'}</td><td>{e.expense_type}</td><td>₹{Number(e.amount).toLocaleString()}</td><td>{new Date(e.expense_date).toLocaleDateString()}</td><td>{e.notes || '-'}</td><td className="text-end"><button className="btn btn-sm btn-outline-danger" onClick={() => remove(`/api/expenses/${e.expense_id}`)}>Delete</button></td></tr>)}</tbody>
+                                <tbody>{visibleExpenses.map(e => <tr key={e.expense_id}><td>{e.registration_number || '-'}</td><td>{e.expense_type}</td><td>₹{Number(e.amount).toLocaleString()}</td><td>{new Date(e.expense_date).toLocaleDateString()}</td><td>{e.notes || '-'}</td><td className="text-end"><button className="btn btn-sm btn-outline-danger" onClick={() => remove(`/api/expenses/${e.expense_id}`)}>Delete</button></td></tr>)}</tbody>
                             </table>
                         </div>
                     </div>

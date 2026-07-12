@@ -14,7 +14,7 @@ router.get('/stats', async (req, res) => {
           COUNT(*) FILTER (WHERE status = 'ON_TRIP')::int AS on_trip,
           COUNT(*) FILTER (WHERE status = 'IN_SHOP')::int AS in_shop,
           COUNT(*) FILTER (WHERE status = 'RETIRED')::int AS retired,
-          ROUND(COUNT(*) FILTER (WHERE status != 'RETIRED' AND status != 'IN_SHOP') * 100.0 / NULLIF(COUNT(*) FILTER (WHERE status != 'RETIRED'), 0), 1) AS utilization_pct
+          ROUND(COUNT(*) FILTER (WHERE status = 'ON_TRIP') * 100.0 / NULLIF(COUNT(*) FILTER (WHERE status != 'RETIRED'), 0), 1) AS utilization_pct
         FROM vehicles
       `),
       pool.query(`
@@ -174,6 +174,22 @@ router.get('/export/csv', async (req, res) => {
 
 router.get('/export/pdf', async (_req, res) => {
   try {
+    const summary = await pool.query(`
+      SELECT
+        COUNT(*) FILTER (WHERE v.status != 'RETIRED')::int AS active_vehicles,
+        COUNT(*) FILTER (WHERE v.status = 'AVAILABLE')::int AS available_vehicles,
+        COUNT(*) FILTER (WHERE v.status = 'ON_TRIP')::int AS vehicles_on_trip,
+        COUNT(*) FILTER (WHERE v.status = 'IN_SHOP')::int AS vehicles_in_shop,
+        COALESCE(SUM(f.cost), 0) AS total_fuel_cost,
+        COALESCE(SUM(m.cost), 0) AS total_maintenance_cost,
+        COALESCE(SUM(e.amount), 0) AS total_expenses,
+        COALESCE(SUM(t.revenue), 0) AS total_revenue
+      FROM vehicles v
+      LEFT JOIN (SELECT vehicle_id, SUM(cost) AS cost FROM fuel_logs GROUP BY vehicle_id) f ON f.vehicle_id = v.vehicle_id
+      LEFT JOIN (SELECT vehicle_id, SUM(cost) AS cost FROM maintenance_logs GROUP BY vehicle_id) m ON m.vehicle_id = v.vehicle_id
+      LEFT JOIN (SELECT vehicle_id, SUM(amount) AS amount FROM expenses GROUP BY vehicle_id) e ON e.vehicle_id = v.vehicle_id
+      LEFT JOIN (SELECT vehicle_id, SUM(revenue) AS revenue FROM trips WHERE status = 'COMPLETED' GROUP BY vehicle_id) t ON t.vehicle_id = v.vehicle_id
+    `);
     const result = await pool.query(`
       SELECT v.registration_number, v.model_name, v.status,
              COALESCE(t.completed, 0) AS completed_trips,
@@ -191,11 +207,15 @@ router.get('/export/pdf', async (_req, res) => {
       LIMIT 42
     `);
 
+    const s = summary.rows[0];
     const lines = [
       `Generated: ${new Date().toISOString()}`,
+      `Active vehicles: ${s.active_vehicles} | Available: ${s.available_vehicles} | On trip: ${s.vehicles_on_trip} | In shop: ${s.vehicles_in_shop}`,
+      `Revenue: INR ${s.total_revenue} | Fuel: INR ${s.total_fuel_cost} | Maintenance: INR ${s.total_maintenance_cost} | Expenses: INR ${s.total_expenses}`,
       '',
+      'Vehicle Performance',
       ...result.rows.map((row) =>
-        `${row.registration_number} | ${row.model_name} | ${row.status} | trips ${row.completed_trips} | ${row.distance_km} km | fuel ${row.fuel_cost} | maintenance ${row.maintenance_cost}`
+        `${row.registration_number} | ${row.model_name} | ${row.status} | completed trips ${row.completed_trips} | ${row.distance_km} km | fuel INR ${row.fuel_cost} | maintenance INR ${row.maintenance_cost}`
       ),
     ];
 
