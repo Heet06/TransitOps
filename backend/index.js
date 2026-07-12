@@ -13,30 +13,30 @@ app.use(helmet())
 app.use(cors())
 app.use(express.json())
 app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 100,
-  }),
+    rateLimit({
+        windowMs: 15 * 60 * 1000,
+        limit: 100,
+    }),
 )
 
 app.get('/', (_request, response) => {
-  response.json({
-    name: 'TransitOps API',
-    status: 'ok',
-  })
+    response.json({
+        name: 'TransitOps API',
+        status: 'ok',
+    })
 })
 
 app.get('/health', (_request, response) => {
-  response.json({ status: 'healthy' })
+    response.json({ status: 'healthy' })
 })
 
 app.use((request, response) => {
-  response.status(404).json({
-    error: 'Not found',
-    path: request.originalUrl,
-  })
+    response.status(404).json({
+        error: 'Not found',
+        path: request.originalUrl,
+    })
 })
 
 app.listen(port, () => {
-  console.log(`TransitOps backend listening on port ${port}`)
+    console.log(`TransitOps backend listening on port ${port}`)
 })
