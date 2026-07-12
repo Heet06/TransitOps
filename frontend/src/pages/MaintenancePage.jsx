@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { authFetch } from '../api.js';
 
 const STATUS_COLORS = {
     OPEN: 'warning',
@@ -21,7 +22,7 @@ export default function MaintenancePage() {
 
     const fetchLogs = async () => {
         try {
-            const res = await fetch('/api/maintenance');
+            const res = await authFetch('/api/maintenance');
             if (res.ok) setLogs(await res.json());
         } catch (err) {
             console.error(err);
@@ -32,8 +33,8 @@ export default function MaintenancePage() {
         const init = async () => {
             try {
                 const [logRes, vehRes] = await Promise.all([
-                    fetch('/api/maintenance'),
-                    fetch('/api/vehicles'),
+                    authFetch('/api/maintenance'),
+                    authFetch('/api/vehicles'),
                 ]);
                 if (logRes.ok) setLogs(await logRes.json());
                 if (vehRes.ok) setVehicles(await vehRes.json());
@@ -53,7 +54,7 @@ export default function MaintenancePage() {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch('/api/maintenance', {
+            const res = await authFetch('/api/maintenance', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -69,6 +70,23 @@ export default function MaintenancePage() {
             setError(err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleClose = async (maintenanceId) => {
+        try {
+            const res = await authFetch(`/api/maintenance/${maintenanceId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'CLOSED' })
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.error || 'Failed to close');
+            }
+            fetchLogs();
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -91,7 +109,7 @@ export default function MaintenancePage() {
                                     <label className="form-label text-muted small fw-bold">Vehicle</label>
                                     <select className="form-select" name="vehicle_id" value={formData.vehicle_id} onChange={handleChange} required>
                                         <option value="">-- Select Vehicle --</option>
-                                        {vehicles.map(v => (
+                                        {vehicles.filter(v => v.status !== 'RETIRED').map(v => (
                                             <option key={v.vehicle_id} value={v.vehicle_id}>{v.registration_number} – {v.model_name}</option>
                                         ))}
                                     </select>
@@ -113,7 +131,6 @@ export default function MaintenancePage() {
                                     <select className="form-select" name="status" value={formData.status} onChange={handleChange}>
                                         <option value="OPEN">Open</option>
                                         <option value="IN_PROGRESS">In Progress</option>
-                                        <option value="CLOSED">Closed</option>
                                     </select>
                                 </div>
                                 <button type="submit" className="btn btn-primary w-100 fw-medium" disabled={loading}>
@@ -140,6 +157,7 @@ export default function MaintenancePage() {
                                             <th>Scheduled</th>
                                             <th>Closed</th>
                                             <th>Status</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -154,6 +172,11 @@ export default function MaintenancePage() {
                                                     <span className={`badge bg-${STATUS_COLORS[log.status] || 'secondary'} bg-opacity-10 text-${STATUS_COLORS[log.status] || 'secondary'}`}>
                                                         {log.status}
                                                     </span>
+                                                </td>
+                                                <td>
+                                                    {log.status !== 'CLOSED' && (
+                                                        <button className="btn btn-sm btn-outline-success" onClick={() => handleClose(log.maintenance_id)}>Close</button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}

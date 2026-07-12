@@ -1,11 +1,27 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
 
 export default function LoginPage() {
     const navigate = useNavigate();
+    const { login } = useAuth();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        navigate('/');
+        setError('');
+        setLoading(true);
+        try {
+            await login(email, password);
+            navigate('/');
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -36,18 +52,40 @@ export default function LoginPage() {
                                         <h2 className="fs-4 fw-bold">Login to your account</h2>
                                         <p className="text-muted small">Enter your email below to login to your account</p>
                                     </div>
+                                    {error && <div className="alert alert-danger small py-2">{error}</div>}
                                     <div className="mb-3">
                                         <label className="form-label small fw-medium" htmlFor="email">Email</label>
-                                        <input className="form-control" type="email" id="email" placeholder="email@example.com" required name="email" />
+                                        <input
+                                            className="form-control"
+                                            type="email"
+                                            id="email"
+                                            placeholder="email@example.com"
+                                            required
+                                            name="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                        />
                                     </div>
                                     <div className="mb-3">
                                         <div className="d-flex align-items-center mb-2">
                                             <label className="form-label mb-0 small fw-medium" htmlFor="password">Password</label>
-                                            <a className="ms-auto small text-decoration-none" href="#!">Forgot your password?</a>
                                         </div>
-                                        <input className="form-control" type="password" id="password" required name="password" />
+                                        <input
+                                            className="form-control"
+                                            type="password"
+                                            id="password"
+                                            required
+                                            name="password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                        />
                                     </div>
-                                    <button className="btn btn-primary w-100" type="submit">Login</button>
+                                    <button className="btn btn-primary w-100" type="submit" disabled={loading}>
+                                        {loading ? 'Signing in...' : 'Login'}
+                                    </button>
+                                    <p className="text-muted small text-center mt-2 mb-0">
+                                        Demo: fleet@transitops.io / manager123
+                                    </p>
                                 </form>
                             </div>
                         </div>

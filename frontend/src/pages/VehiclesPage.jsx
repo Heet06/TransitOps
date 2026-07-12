@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { authFetch } from '../api.js';
 
 export default function VehiclesPage() {
     const [vehicles, setVehicles] = useState([]);
@@ -16,7 +17,7 @@ export default function VehiclesPage() {
 
     const fetchVehicles = async () => {
         try {
-            const res = await fetch('/api/vehicles');
+            const res = await authFetch('/api/vehicles');
             if (res.ok) setVehicles(await res.json());
         } catch (err) {
             console.error(err);
@@ -27,8 +28,8 @@ export default function VehiclesPage() {
         const init = async () => {
             try {
                 const [vehRes, typeRes] = await Promise.all([
-                    fetch('/api/vehicles'),
-                    fetch('/api/vehicle-types'),
+                    authFetch('/api/vehicles'),
+                    authFetch('/api/vehicle-types'),
                 ]);
                 if (vehRes.ok) setVehicles(await vehRes.json());
                 if (typeRes.ok) setVehicleTypes(await typeRes.json());
@@ -48,7 +49,7 @@ export default function VehiclesPage() {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch('/api/vehicles', {
+            const res = await authFetch('/api/vehicles', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -67,7 +68,7 @@ export default function VehiclesPage() {
         }
     };
 
-    const STATUS_COLORS = { AVAILABLE: 'success', IN_USE: 'primary', MAINTENANCE: 'warning', RETIRED: 'danger' };
+    const STATUS_COLORS = { AVAILABLE: 'success', ON_TRIP: 'primary', IN_SHOP: 'warning', RETIRED: 'danger' };
 
     return (
         <div>

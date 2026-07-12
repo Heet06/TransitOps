@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
+import { authFetch } from '../api.js';
 
 const STATUS_COLORS = {
     DRAFT: 'secondary',
     DISPATCHED: 'info',
-    IN_TRANSIT: 'primary',
     COMPLETED: 'success',
     CANCELLED: 'danger',
 };
@@ -26,7 +26,7 @@ export default function TripsPage() {
 
     const fetchTrips = async () => {
         try {
-            const res = await fetch('/api/trips');
+            const res = await authFetch('/api/trips');
             if (res.ok) setTrips(await res.json());
         } catch (err) {
             console.error(err);
@@ -37,9 +37,9 @@ export default function TripsPage() {
         const init = async () => {
             try {
                 const [tripRes, vehRes, drvRes] = await Promise.all([
-                    fetch('/api/trips'),
-                    fetch('/api/vehicles'),
-                    fetch('/api/drivers'),
+                    authFetch('/api/trips'),
+                    authFetch('/api/vehicles'),
+                    authFetch('/api/drivers'),
                 ]);
                 if (tripRes.ok) setTrips(await tripRes.json());
                 if (vehRes.ok) setVehicles(await vehRes.json());
@@ -60,7 +60,7 @@ export default function TripsPage() {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch('/api/trips', {
+            const res = await authFetch('/api/trips', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -76,6 +76,62 @@ export default function TripsPage() {
             setError(err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDispatch = async (tripId) => {
+        try {
+            const res = await authFetch(`/api/trips/${tripId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'DISPATCHED' })
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.error || 'Failed to dispatch');
+            }
+            fetchTrips();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleComplete = async (tripId) => {
+        const dist = prompt('Actual distance (km):');
+        const fuel = prompt('Fuel consumed (liters):');
+        const odo = prompt('End odometer (km):');
+        if (!dist || !fuel || !odo) return;
+        try {
+            const res = await authFetch(`/api/trips/${tripId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'COMPLETED', actual_distance_km: Number(dist), fuel_consumed_l: Number(fuel), end_odometer_km: Number(odo) })
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.error || 'Failed to complete');
+            }
+            fetchTrips();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleCancel = async (tripId) => {
+        if (!confirm('Cancel this trip?')) return;
+        try {
+            const res = await authFetch(`/api/trips/${tripId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'CANCELLED' })
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.error || 'Failed to cancel');
+            }
+            fetchTrips();
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -129,7 +185,7 @@ export default function TripsPage() {
                                     <input type="number" className="form-control" name="planned_distance_km" value={formData.planned_distance_km} onChange={handleChange} min="0.01" step="0.01" required />
                                 </div>
                                 <button type="submit" className="btn btn-primary w-100 fw-medium" disabled={loading}>
-                                    {loading ? 'Dispatching...' : 'Dispatch Trip'}
+                                    {loading ? 'Creating...' : 'Create Trip'}
                                 </button>
                             </form>
                         </div>
@@ -152,6 +208,7 @@ export default function TripsPage() {
                                             <th>Driver</th>
                                             <th>Distance (km)</th>
                                             <th>Status</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -166,6 +223,17 @@ export default function TripsPage() {
                                                     <span className={`badge bg-${STATUS_COLORS[t.status] || 'secondary'} bg-opacity-10 text-${STATUS_COLORS[t.status] || 'secondary'}`}>
                                                         {t.status}
                                                     </span>
+                                                </td>
+                                                <td>
+                                                    {t.status === 'DRAFT' && (
+                                                        <button className="btn btn-sm btn-outline-primary" onClick={() => handleDispatch(t.trip_id)}>Dispatch</button>
+                                                    )}
+                                                    {t.status === 'DISPATCHED' && (
+                                                        <>
+                                                            <button className="btn btn-sm btn-outline-success me-1" onClick={() => handleComplete(t.trip_id)}>Complete</button>
+                                                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleCancel(t.trip_id)}>Cancel</button>
+                                                        </>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}

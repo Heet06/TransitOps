@@ -1,18 +1,50 @@
+import { useState, useEffect } from 'react';
+
+const ROLE_LABELS = {
+    FLEET_MANAGER: 'Fleet Manager',
+    DISPATCHER: 'Dispatcher',
+    SAFETY_OFFICER: 'Safety Officer',
+    FINANCIAL_ANALYST: 'Financial Analyst',
+    ADMIN: 'Admin',
+    DRIVER: 'Driver',
+};
+
+const ROLE_PAGES = {
+    FLEET_MANAGER: 'Dashboard, Vehicles, Drivers, Trips, Reports, Settings',
+    DISPATCHER: 'Dashboard, Vehicles, Trips, Reports',
+    SAFETY_OFFICER: 'Dashboard, Drivers, Maintenance, Reports',
+    FINANCIAL_ANALYST: 'Dashboard, Fuel & Expense, Reports',
+    ADMIN: 'All Pages',
+    DRIVER: 'Dashboard, Trips',
+};
+
 export default function SettingsPage() {
-    const roleRows = [
-        { role: 'Admin', name: 'Super Administrator', pages: 'All Pages' },
-        { role: 'Manager', name: 'Fleet Manager', pages: 'Dashboard, Vehicles, Drivers, Trips, Reports' },
-        { role: 'Dispatcher', name: 'Trip Dispatcher', pages: 'Dashboard, Trips, Drivers' },
-        { role: 'Mechanic', name: 'Maintenance Staff', pages: 'Dashboard, Vehicles, Maintenance' }
-    ];
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const token = localStorage.getItem('transitops_token');
+        fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data) setUsers([data]);
+            })
+            .catch(() => {})
+            .finally(() => setLoading(false));
+    }, []);
+
+    const roleRows = Object.entries(ROLE_LABELS).map(([key, label]) => ({
+        role: key,
+        name: label,
+        pages: ROLE_PAGES[key] || 'Dashboard',
+    }));
 
     return (
         <div className="row g-4">
             <div className="col-12">
                 <div className="card border-0 shadow-sm">
-                    <div className="card-header bg-transparent border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                    <div className="card-header bg-transparent border-0 pt-4 pb-0">
                         <h5 className="fw-bold mb-0">Role-Based Access Control (RBAC)</h5>
-                        <button className="btn btn-primary btn-sm">Create Role</button>
                     </div>
                     <div className="card-body">
                         <div className="table-responsive">
@@ -21,20 +53,15 @@ export default function SettingsPage() {
                                     <tr>
                                         <th>Role</th>
                                         <th>Name</th>
-                                        <th>Pages</th>
-                                        <th>Actions</th>
+                                        <th>Accessible Pages</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {roleRows.map((r, i) => (
-                                        <tr key={i}>
-                                            <td><span className="badge bg-primary bg-opacity-10 text-primary fw-medium">{r.role}</span></td>
+                                    {roleRows.map((r) => (
+                                        <tr key={r.role}>
+                                            <td><span className="badge bg-primary bg-opacity-10 text-primary fw-medium">{r.name}</span></td>
                                             <td><span className="fw-medium">{r.name}</span></td>
                                             <td>{r.pages}</td>
-                                            <td>
-                                                <button className="btn btn-sm btn-outline-secondary me-2">Edit</button>
-                                                <button className="btn btn-sm btn-outline-danger">Delete</button>
-                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -43,6 +70,26 @@ export default function SettingsPage() {
                     </div>
                 </div>
             </div>
+
+            {!loading && users.length > 0 && (
+                <div className="col-12">
+                    <div className="card border-0 shadow-sm">
+                        <div className="card-header bg-transparent border-0 pt-4 pb-0">
+                            <h5 className="fw-bold mb-0">Current Session</h5>
+                        </div>
+                        <div className="card-body">
+                            <ul className="list-group list-group-flush">
+                                {users.map(u => (
+                                    <li className="list-group-item d-flex justify-content-between" key={u.user_id}>
+                                        <span className="fw-medium">{u.full_name}</span>
+                                        <span className="badge bg-info bg-opacity-10 text-info">{ROLE_LABELS[u.role] || u.role}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { authFetch } from '../api.js';
 
 export default function DriversPage() {
     const [drivers, setDrivers] = useState([]);
@@ -17,7 +18,7 @@ export default function DriversPage() {
 
     const fetchDrivers = async () => {
         try {
-            const res = await fetch('/api/drivers');
+            const res = await authFetch('/api/drivers');
             if (res.ok) setDrivers(await res.json());
         } catch (err) {
             console.error(err);
@@ -28,8 +29,8 @@ export default function DriversPage() {
         const init = async () => {
             try {
                 const [drvRes, catRes] = await Promise.all([
-                    fetch('/api/drivers'),
-                    fetch('/api/license-categories'),
+                    authFetch('/api/drivers'),
+                    authFetch('/api/license-categories'),
                 ]);
                 if (drvRes.ok) setDrivers(await drvRes.json());
                 if (catRes.ok) setLicenseCategories(await catRes.json());
@@ -49,7 +50,7 @@ export default function DriversPage() {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch('/api/drivers', {
+            const res = await authFetch('/api/drivers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -154,9 +155,6 @@ export default function DriversPage() {
                                                                 className={`progress-bar ${d.safety_score >= 90 ? 'bg-success' : d.safety_score >= 75 ? 'bg-warning' : 'bg-danger'}`}
                                                                 role="progressbar"
                                                                 style={{ width: `${d.safety_score}%` }}
-                                                                aria-valuenow={d.safety_score}
-                                                                aria-valuemin="0"
-                                                                aria-valuemax="100"
                                                             />
                                                         </div>
                                                         <span className="small text-muted">{d.safety_score}%</span>

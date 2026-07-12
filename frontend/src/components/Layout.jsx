@@ -1,7 +1,18 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
+
+const ROLE_LABELS = {
+  FLEET_MANAGER: 'Fleet Manager',
+  DISPATCHER: 'Dispatcher',
+  SAFETY_OFFICER: 'Safety Officer',
+  FINANCIAL_ANALYST: 'Financial Analyst',
+  ADMIN: 'Admin',
+  DRIVER: 'Driver',
+};
 
 export default function Layout() {
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const navItems = [
     { id: '/', label: 'Dashboard' },
@@ -67,11 +78,16 @@ export default function Layout() {
                             </div>
                             <div className="dropdown">
                                 <button className="btn dropdown-toggle border-0 p-2" data-bs-toggle="dropdown" aria-expanded="false" type="button">
-                                    <span className="fw-bold">Admin</span>
+                                    <span className="fw-bold">{user?.full_name || 'Admin'}</span>
                                 </button>
                                 <div className="dropdown-menu dropdown-menu-end shadow">
+                                    <div className="dropdown-item-text small text-muted">
+                                        <div className="fw-medium">{user?.full_name}</div>
+                                        <div>{ROLE_LABELS[user?.role] || user?.role}</div>
+                                    </div>
+                                    <div className="dropdown-divider"></div>
                                     <Link className="dropdown-item" to="/settings">Settings</Link>
-                                    <Link className="dropdown-item text-danger" to="/login">Logout</Link>
+                                    <button className="dropdown-item text-danger" onClick={logout}>Logout</button>
                                 </div>
                             </div>
                         </div>

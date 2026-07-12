@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { authFetch } from '../api.js';
 
 export default function DashboardPage() {
     const [vehicles, setVehicles] = useState([]);
@@ -9,9 +10,9 @@ export default function DashboardPage() {
         const fetchData = async () => {
             try {
                 const [vehRes, drvRes, tripRes] = await Promise.all([
-                    fetch('/api/vehicles'),
-                    fetch('/api/drivers'),
-                    fetch('/api/trips')
+                    authFetch('/api/vehicles'),
+                    authFetch('/api/drivers'),
+                    authFetch('/api/trips')
                 ]);
                 
                 if (vehRes.ok) setVehicles(await vehRes.json());
@@ -25,21 +26,21 @@ export default function DashboardPage() {
     }, []);
 
     const activeVehicles = vehicles.filter(v => v.status === 'AVAILABLE').length;
-    const maintenanceVehicles = vehicles.filter(v => v.status === 'MAINTENANCE').length;
+    const maintenanceVehicles = vehicles.filter(v => v.status === 'IN_SHOP').length;
     
-    const activeTrips = trips.filter(t => t.status === 'DISPATCHED' || t.status === 'IN_TRANSIT').length;
+    const activeTrips = trips.filter(t => t.status === 'DISPATCHED').length;
     const pendingTrips = trips.filter(t => t.status === 'DRAFT').length;
     
     const driversOnDuty = drivers.filter(d => d.status === 'AVAILABLE' || d.status === 'ON_TRIP').length;
-    const utilization = vehicles.length > 0 ? Math.round(((activeVehicles - maintenanceVehicles) / vehicles.length) * 100) : 0;
+    const utilization = vehicles.length > 0 ? Math.round(((activeVehicles) / vehicles.length) * 100) : 0;
 
     const kpis = [
         { label: 'Total Vehicles', value: vehicles.length.toString() },
         { label: 'Available Vehicles', value: activeVehicles.toString() },
-        { label: 'Vehicles in maintenance', value: maintenanceVehicles.toString() },
+        { label: 'Vehicles in Maintenance', value: maintenanceVehicles.toString() },
         { label: 'Active Trips', value: activeTrips.toString() },
         { label: 'Pending Trips', value: pendingTrips.toString() },
-        { label: 'Drivers on duty', value: driversOnDuty.toString() },
+        { label: 'Drivers on Duty', value: driversOnDuty.toString() },
         { label: 'Fleet Utilization', value: utilization + '%' }
     ];
 
@@ -76,12 +77,12 @@ export default function DashboardPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {vehicles.slice(0, 5).map((v, i) => (
-                                            <tr key={i}>
+                                        {vehicles.slice(0, 5).map((v) => (
+                                            <tr key={v.vehicle_id}>
                                                 <td><span className="fw-medium">{v.registration_number}</span></td>
                                                 <td>{v.model_name}</td>
-                                                <td>{v.max_load_capacity_kg}</td>
-                                                <td><span className={`badge ${v.status === 'AVAILABLE' ? 'bg-success' : 'bg-warning'} bg-opacity-10 text-${v.status === 'AVAILABLE' ? 'success' : 'warning'}`}>{v.status}</span></td>
+                                                <td>{Number(v.max_load_capacity_kg).toLocaleString()}</td>
+                                                <td><span className={`badge ${v.status === 'AVAILABLE' ? 'bg-success' : v.status === 'ON_TRIP' ? 'bg-primary' : v.status === 'IN_SHOP' ? 'bg-warning' : 'bg-danger'} bg-opacity-10`}>{v.status}</span></td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -98,8 +99,8 @@ export default function DashboardPage() {
                         </div>
                         <div className="card-body">
                             <ul className="list-group list-group-flush">
-                                {drivers.filter(d => d.status === 'AVAILABLE' || d.status === 'ON_TRIP').slice(0, 5).map((d, i) => (
-                                    <li className="list-group-item d-flex justify-content-between align-items-center px-0" key={i}>
+                                {drivers.filter(d => d.status === 'AVAILABLE' || d.status === 'ON_TRIP').slice(0, 5).map((d) => (
+                                    <li className="list-group-item d-flex justify-content-between align-items-center px-0" key={d.driver_id}>
                                         <span className="fw-medium">{d.full_name}</span>
                                         <span className={`badge ${d.status === 'AVAILABLE' ? 'bg-primary' : 'bg-secondary'} bg-opacity-10 text-${d.status === 'AVAILABLE' ? 'primary' : 'secondary'}`}>{d.status}</span>
                                     </li>
@@ -129,13 +130,13 @@ export default function DashboardPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {trips.slice(0, 5).map((t, i) => (
-                                            <tr key={i}>
+                                        {trips.slice(0, 5).map((t) => (
+                                            <tr key={t.trip_id}>
                                                 <td>{t.source}</td>
                                                 <td>{t.destination}</td>
-                                                <td>{t.registration_number}</td>
-                                                <td>{t.driver_name}</td>
-                                                <td><span className={`badge ${t.status === 'COMPLETED' ? 'bg-success' : 'bg-info'} bg-opacity-10 text-${t.status === 'COMPLETED' ? 'success' : 'info'}`}>{t.status}</span></td>
+                                                <td><span className="fw-medium">{t.registration_number || '—'}</span></td>
+                                                <td>{t.driver_name || '—'}</td>
+                                                <td><span className={`badge ${t.status === 'COMPLETED' ? 'bg-success' : t.status === 'DISPATCHED' ? 'bg-info' : t.status === 'DRAFT' ? 'bg-secondary' : 'bg-danger'} bg-opacity-10 text-${t.status === 'COMPLETED' ? 'success' : t.status === 'DISPATCHED' ? 'info' : t.status === 'DRAFT' ? 'secondary' : 'danger'}`}>{t.status}</span></td>
                                             </tr>
                                         ))}
                                     </tbody>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { authFetch } from '../api.js';
 
 const EXPENSE_TYPES = ['FUEL', 'MAINTENANCE', 'TOLL', 'INSURANCE', 'OTHER'];
 const TYPE_COLORS = {
@@ -12,10 +13,8 @@ const TYPE_COLORS = {
 export default function ExpensePage() {
     const [expenses, setExpenses] = useState([]);
     const [vehicles, setVehicles] = useState([]);
-    const [trips, setTrips] = useState([]);
     const [formData, setFormData] = useState({
         vehicle_id: '',
-        trip_id: '',
         expense_type: 'FUEL',
         amount: '',
         expense_date: new Date().toISOString().split('T')[0],
@@ -26,7 +25,7 @@ export default function ExpensePage() {
 
     const fetchExpenses = async () => {
         try {
-            const res = await fetch('/api/expenses');
+            const res = await authFetch('/api/expenses');
             if (res.ok) setExpenses(await res.json());
         } catch (err) {
             console.error(err);
@@ -36,14 +35,12 @@ export default function ExpensePage() {
     useEffect(() => {
         const init = async () => {
             try {
-                const [expRes, vehRes, tripRes] = await Promise.all([
-                    fetch('/api/expenses'),
-                    fetch('/api/vehicles'),
-                    fetch('/api/trips'),
+                const [expRes, vehRes] = await Promise.all([
+                    authFetch('/api/expenses'),
+                    authFetch('/api/vehicles'),
                 ]);
                 if (expRes.ok) setExpenses(await expRes.json());
                 if (vehRes.ok) setVehicles(await vehRes.json());
-                if (tripRes.ok) setTrips(await tripRes.json());
             } catch (err) {
                 console.error(err);
             }
@@ -60,17 +57,16 @@ export default function ExpensePage() {
         setError('');
         setLoading(true);
         try {
-            const payload = { ...formData, trip_id: formData.trip_id || null };
-            const res = await fetch('/api/expenses', {
+            const res = await authFetch('/api/expenses', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(formData)
             });
             const data = await res.json();
             if (!res.ok) {
                 setError(data.error || 'Failed to log expense.');
             } else {
-                setFormData({ vehicle_id: '', trip_id: '', expense_type: 'FUEL', amount: '', expense_date: new Date().toISOString().split('T')[0], notes: '' });
+                setFormData({ vehicle_id: '', expense_type: 'FUEL', amount: '', expense_date: new Date().toISOString().split('T')[0], notes: '' });
                 fetchExpenses();
             }
         } catch (err) {
@@ -92,7 +88,6 @@ export default function ExpensePage() {
                 <h4 className="fw-bold mb-0">Fuel & Expense Management</h4>
             </div>
 
-            {/* Summary Cards */}
             <div className="row g-3 mb-4">
                 <div className="col-12 col-sm-6 col-md-3">
                     <div className="card border-0 shadow-sm h-100">
@@ -129,15 +124,6 @@ export default function ExpensePage() {
                                         <option value="">-- Select Vehicle --</option>
                                         {vehicles.map(v => (
                                             <option key={v.vehicle_id} value={v.vehicle_id}>{v.registration_number} – {v.model_name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="mb-3">
-                                    <label className="form-label text-muted small fw-bold">Trip (optional)</label>
-                                    <select className="form-select" name="trip_id" value={formData.trip_id} onChange={handleChange}>
-                                        <option value="">-- None --</option>
-                                        {trips.map(t => (
-                                            <option key={t.trip_id} value={t.trip_id}>{t.source} → {t.destination} ({t.status})</option>
                                         ))}
                                     </select>
                                 </div>
