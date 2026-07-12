@@ -1,6 +1,7 @@
 const express = require('express');
 const Joi = require('joi');
 const { pool } = require('../db');
+const { sendDbError } = require('../utils/http');
 
 const router = express.Router();
 
@@ -33,6 +34,12 @@ router.get('/', async (req, res) => {
       conditions.push(`region_id = $${params.length + 1}`);
       params.push(req.query.region_id);
     }
+    if (req.query.expiry === 'expired') {
+      conditions.push('license_expiry_date < CURRENT_DATE');
+    }
+    if (req.query.expiry === 'soon') {
+      conditions.push("license_expiry_date >= CURRENT_DATE AND license_expiry_date <= CURRENT_DATE + INTERVAL '30 days'");
+    }
 
     if (conditions.length > 0) {
       query += ' WHERE ' + conditions.join(' AND ');
@@ -42,7 +49,7 @@ router.get('/', async (req, res) => {
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
   }
 });
 
@@ -52,7 +59,7 @@ router.get('/:id', async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'Driver not found' });
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
   }
 });
 
@@ -70,7 +77,7 @@ router.post('/', async (req, res) => {
     res.status(201).json(result.rows[0]);
   } catch (err) {
     if (err.code === '23505') return res.status(409).json({ error: 'License number already exists' });
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
   }
 });
 
@@ -90,7 +97,7 @@ router.put('/:id', async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     if (err.code === '23505') return res.status(409).json({ error: 'License number already exists' });
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
   }
 });
 
@@ -101,7 +108,7 @@ router.delete('/:id', async (req, res) => {
     res.json({ message: 'Driver deleted' });
   } catch (err) {
     if (err.code === '23503') return res.status(409).json({ error: 'Cannot delete driver with associated records' });
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
   }
 });
 

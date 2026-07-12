@@ -1,6 +1,7 @@
 const express = require('express');
 const Joi = require('joi');
 const { pool } = require('../db');
+const { sendDbError } = require('../utils/http');
 
 const router = express.Router();
 
@@ -39,7 +40,7 @@ router.get('/', async (req, res) => {
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
   }
 });
 
@@ -55,7 +56,24 @@ router.post('/', async (req, res) => {
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
+  }
+});
+
+router.put('/:id', async (req, res) => {
+  const { error, value } = fuelLogSchema.validate(req.body);
+  if (error) return res.status(400).json({ error: error.details[0].message });
+
+  try {
+    const result = await pool.query(
+      `UPDATE fuel_logs SET vehicle_id=$1, trip_id=$2, liters=$3, cost=$4, log_date=$5
+       WHERE fuel_log_id=$6 RETURNING *`,
+      [value.vehicle_id, value.trip_id, value.liters, value.cost, value.log_date, req.params.id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Fuel log not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    sendDbError(res, err);
   }
 });
 
@@ -65,7 +83,7 @@ router.delete('/:id', async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'Fuel log not found' });
     res.json({ message: 'Fuel log deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
   }
 });
 

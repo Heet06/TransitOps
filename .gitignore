@@ -9,6 +9,7 @@ lerna-debug.log*
 .env.local
 .env.*.local
 .env.production
+!**/.env.example
 
 dist/
 build/
@@ -25,4 +26,6 @@ vite-env.d.ts
 coverage/
 .nyc_output/
 
+*.log
+.DS_Store
 *.sql

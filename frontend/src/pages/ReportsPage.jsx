@@ -33,6 +33,20 @@ export default function ReportsPage() {
         .catch(err => console.error(err));
     };
 
+    const handlePdfExport = () => {
+        authFetch('/api/reports/export/pdf')
+        .then(res => res.blob())
+        .then(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'transitops_operations_report.pdf';
+            a.click();
+            URL.revokeObjectURL(url);
+        })
+        .catch(err => console.error(err));
+    };
+
     if (loading) return <div className="d-flex justify-content-center py-5"><div className="spinner-border text-primary"></div></div>;
     if (!stats) return <div className="text-center py-5 text-muted">Failed to load reports data.</div>;
 
@@ -43,7 +57,9 @@ export default function ReportsPage() {
     const e = overview.expenses;
 
     const avgEfficiency = perVehicle.length > 0
-        ? (perVehicle.filter(x => x.fuel_liters > 0).reduce((s, x) => s + x.total_distance / x.fuel_liters, 0) / perVehicle.filter(x => x.fuel_liters > 0).length || 0).toFixed(1)
+        ? (perVehicle
+            .filter(x => (x.trip_fuel_liters || x.fuel_liters) > 0)
+            .reduce((s, x) => s + x.total_distance / (x.trip_fuel_liters || x.fuel_liters), 0) / perVehicle.filter(x => (x.trip_fuel_liters || x.fuel_liters) > 0).length || 0).toFixed(1)
         : '0';
 
     const reportCards = [
@@ -57,9 +73,10 @@ export default function ReportsPage() {
         <div>
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div></div>
-                <button className="btn btn-outline-primary btn-sm" onClick={handleExport}>
-                    Export CSV
-                </button>
+                <div className="btn-group btn-group-sm">
+                    <button className="btn btn-outline-primary" onClick={handleExport}>Export CSV</button>
+                    <button className="btn btn-outline-primary" onClick={handlePdfExport}>Export PDF</button>
+                </div>
             </div>
 
             <div className="row g-4 mb-4">

@@ -19,15 +19,21 @@ export default function TripsPage() {
         driver_id: '',
         cargo_weight_kg: '',
         planned_distance_km: '',
-        status: 'DRAFT'
+        revenue: ''
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const fetchTrips = async () => {
         try {
-            const res = await authFetch('/api/trips');
-            if (res.ok) setTrips(await res.json());
+            const [tripRes, vehRes, drvRes] = await Promise.all([
+                authFetch('/api/trips'),
+                authFetch('/api/vehicles'),
+                authFetch('/api/drivers'),
+            ]);
+            if (tripRes.ok) setTrips(await tripRes.json());
+            if (vehRes.ok) setVehicles(await vehRes.json());
+            if (drvRes.ok) setDrivers(await drvRes.json());
         } catch (err) {
             console.error(err);
         }
@@ -63,13 +69,21 @@ export default function TripsPage() {
             const res = await authFetch('/api/trips', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    source: formData.source,
+                    destination: formData.destination,
+                    vehicle_id: formData.vehicle_id,
+                    driver_id: formData.driver_id,
+                    cargo_weight_kg: Number(formData.cargo_weight_kg),
+                    planned_distance_km: Number(formData.planned_distance_km),
+                    revenue: Number(formData.revenue || 0),
+                })
             });
             const data = await res.json();
             if (!res.ok) {
                 setError(data.error || 'Failed to dispatch trip.');
             } else {
-                setFormData({ source: '', destination: '', vehicle_id: '', driver_id: '', cargo_weight_kg: '', planned_distance_km: '', status: 'DRAFT' });
+                setFormData({ source: '', destination: '', vehicle_id: '', driver_id: '', cargo_weight_kg: '', planned_distance_km: '', revenue: '' });
                 fetchTrips();
             }
         } catch (err) {
@@ -100,12 +114,13 @@ export default function TripsPage() {
         const dist = prompt('Actual distance (km):');
         const fuel = prompt('Fuel consumed (liters):');
         const odo = prompt('End odometer (km):');
+        const revenue = prompt('Revenue (optional):');
         if (!dist || !fuel || !odo) return;
         try {
             const res = await authFetch(`/api/trips/${tripId}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'COMPLETED', actual_distance_km: Number(dist), fuel_consumed_l: Number(fuel), end_odometer_km: Number(odo) })
+                body: JSON.stringify({ status: 'COMPLETED', actual_distance_km: Number(dist), fuel_consumed_l: Number(fuel), end_odometer_km: Number(odo), revenue: Number(revenue || 0) })
             });
             if (!res.ok) {
                 const data = await res.json();
@@ -171,7 +186,7 @@ export default function TripsPage() {
                                     <label className="form-label text-muted small fw-bold">Driver</label>
                                     <select className="form-select" name="driver_id" value={formData.driver_id} onChange={handleChange} required>
                                         <option value="">-- Select Driver --</option>
-                                        {drivers.filter(d => d.status === 'AVAILABLE').map(d => (
+                                        {drivers.filter(d => d.status === 'AVAILABLE' && new Date(d.license_expiry_date) >= new Date(new Date().toISOString().slice(0, 10))).map(d => (
                                             <option key={d.driver_id} value={d.driver_id}>{d.full_name} – {d.license_number}</option>
                                         ))}
                                     </select>
@@ -183,6 +198,10 @@ export default function TripsPage() {
                                 <div className="mb-4">
                                     <label className="form-label text-muted small fw-bold">Planned Distance (km)</label>
                                     <input type="number" className="form-control" name="planned_distance_km" value={formData.planned_distance_km} onChange={handleChange} min="0.01" step="0.01" required />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="form-label text-muted small fw-bold">Revenue (₹)</label>
+                                    <input type="number" className="form-control" name="revenue" value={formData.revenue} onChange={handleChange} min="0" step="0.01" />
                                 </div>
                                 <button type="submit" className="btn btn-primary w-100 fw-medium" disabled={loading}>
                                     {loading ? 'Creating...' : 'Create Trip'}

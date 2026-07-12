@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../db');
+const { rowsToCsv, buildSimplePdf, sendDbError } = require('../utils/http');
 
 const router = express.Router();
 
@@ -61,6 +62,7 @@ router.get('/stats', async (req, res) => {
         COALESCE(exp.total_cost, 0) AS other_expense_cost,
         COALESCE(trip.revenue, 0) AS revenue,
         COALESCE(fuel.total_liters, 0) AS fuel_liters,
+        COALESCE(trip.trip_fuel_liters, 0) AS trip_fuel_liters,
         COALESCE(trip.total_distance, 0) AS total_distance
       FROM vehicles v
       LEFT JOIN (
@@ -76,7 +78,7 @@ router.get('/stats', async (req, res) => {
         FROM expenses GROUP BY vehicle_id
       ) exp ON v.vehicle_id = exp.vehicle_id
       LEFT JOIN (
-        SELECT vehicle_id, SUM(revenue) AS revenue, SUM(COALESCE(actual_distance_km, planned_distance_km)) AS total_distance
+        SELECT vehicle_id, SUM(revenue) AS revenue, SUM(COALESCE(actual_distance_km, planned_distance_km)) AS total_distance, SUM(COALESCE(fuel_consumed_l, 0)) AS trip_fuel_liters
         FROM trips WHERE status = 'COMPLETED' GROUP BY vehicle_id
       ) trip ON v.vehicle_id = trip.vehicle_id
       WHERE v.status != 'RETIRED'
@@ -88,7 +90,8 @@ router.get('/stats', async (req, res) => {
       const revenue = Number(v.revenue);
       const acquisitionCost = Number(v.acquisition_cost) || 1;
       const roi = ((revenue - totalCost) / acquisitionCost * 100).toFixed(1);
-      const fuelEfficiency = Number(v.fuel_liters) > 0 ? (Number(v.total_distance) / Number(v.fuel_liters)).toFixed(1) : 'N/A';
+      const litersForEfficiency = Number(v.trip_fuel_liters) > 0 ? Number(v.trip_fuel_liters) : Number(v.fuel_liters);
+      const fuelEfficiency = litersForEfficiency > 0 ? (Number(v.total_distance) / litersForEfficiency).toFixed(1) : 'N/A';
 
       return {
         vehicle_id: v.vehicle_id,
@@ -103,6 +106,7 @@ router.get('/stats', async (req, res) => {
         fuel_efficiency: fuelEfficiency === 'N/A' ? 'N/A' : fuelEfficiency + ' km/L',
         total_distance: Number(v.total_distance),
         fuel_liters: Number(v.fuel_liters),
+        trip_fuel_liters: Number(v.trip_fuel_liters),
       };
     });
 
@@ -117,7 +121,7 @@ router.get('/stats', async (req, res) => {
       perVehicle: vehicleDetails,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
   }
 });
 
@@ -144,32 +148,63 @@ router.get('/export/csv', async (req, res) => {
       ORDER BY t.created_at DESC
     `);
 
-    const headers = ['Trip ID', 'Source', 'Destination', 'Vehicle', 'Driver', 'Cargo (kg)', 'Planned Dist (km)', 'Actual Dist (km)', 'Fuel (L)', 'Revenue', 'Status', 'Dispatched At', 'Completed At'];
-    const csvRows = [headers.join(',')];
-
-    for (const row of result.rows) {
-      csvRows.push([
-        row.trip_id,
-        `"${row.source}"`,
-        `"${row.destination}"`,
-        row.registration_number,
-        `"${row.driver_name}"`,
-        row.cargo_weight_kg,
-        row.planned_distance_km,
-        row.actual_distance_km || '',
-        row.fuel_consumed_l || '',
-        row.revenue || 0,
-        row.status,
-        row.dispatched_at || '',
-        row.completed_at || '',
-      ].join(','));
-    }
+    const csv = rowsToCsv([
+      { key: 'trip_id', label: 'Trip ID' },
+      { key: 'source', label: 'Source' },
+      { key: 'destination', label: 'Destination' },
+      { key: 'registration_number', label: 'Vehicle' },
+      { key: 'driver_name', label: 'Driver' },
+      { key: 'cargo_weight_kg', label: 'Cargo (kg)' },
+      { key: 'planned_distance_km', label: 'Planned Dist (km)' },
+      { key: 'actual_distance_km', label: 'Actual Dist (km)' },
+      { key: 'fuel_consumed_l', label: 'Fuel (L)' },
+      { key: 'revenue', label: 'Revenue' },
+      { key: 'status', label: 'Status' },
+      { key: 'dispatched_at', label: 'Dispatched At' },
+      { key: 'completed_at', label: 'Completed At' },
+    ], result.rows);
 
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename=transitops_trips_export.csv');
-    res.send(csvRows.join('\n'));
+    res.send(csv);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
+  }
+});
+
+router.get('/export/pdf', async (_req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT v.registration_number, v.model_name, v.status,
+             COALESCE(t.completed, 0) AS completed_trips,
+             COALESCE(t.distance, 0) AS distance_km,
+             COALESCE(f.cost, 0) AS fuel_cost,
+             COALESCE(m.cost, 0) AS maintenance_cost
+      FROM vehicles v
+      LEFT JOIN (
+        SELECT vehicle_id, COUNT(*) AS completed, SUM(COALESCE(actual_distance_km, planned_distance_km)) AS distance
+        FROM trips WHERE status = 'COMPLETED' GROUP BY vehicle_id
+      ) t ON t.vehicle_id = v.vehicle_id
+      LEFT JOIN (SELECT vehicle_id, SUM(cost) AS cost FROM fuel_logs GROUP BY vehicle_id) f ON f.vehicle_id = v.vehicle_id
+      LEFT JOIN (SELECT vehicle_id, SUM(cost) AS cost FROM maintenance_logs GROUP BY vehicle_id) m ON m.vehicle_id = v.vehicle_id
+      ORDER BY v.registration_number
+      LIMIT 42
+    `);
+
+    const lines = [
+      `Generated: ${new Date().toISOString()}`,
+      '',
+      ...result.rows.map((row) =>
+        `${row.registration_number} | ${row.model_name} | ${row.status} | trips ${row.completed_trips} | ${row.distance_km} km | fuel ${row.fuel_cost} | maintenance ${row.maintenance_cost}`
+      ),
+    ];
+
+    const pdf = buildSimplePdf('TransitOps Operations Report', lines);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=transitops_operations_report.pdf');
+    res.send(pdf);
+  } catch (err) {
+    sendDbError(res, err);
   }
 });
 

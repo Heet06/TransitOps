@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 import { getToken, setToken, clearToken, authFetch } from '../api.js';
 
@@ -6,25 +7,22 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setTokenState] = useState(getToken());
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!token);
 
   useEffect(() => {
-    if (token) {
-      authFetch('/api/auth/me')
-        .then((res) => {
-          if (res.ok) return res.json();
-          throw new Error('Invalid token');
-        })
-        .then((data) => setUser(data))
-        .catch(() => {
-          clearToken();
-          setTokenState(null);
-          setUser(null);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    if (!token) return;
+    authFetch('/api/auth/me')
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error('Invalid token');
+      })
+      .then((data) => setUser(data))
+      .catch(() => {
+        clearToken();
+        setTokenState(null);
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
   }, [token]);
 
   const login = async (email, password) => {

@@ -68,6 +68,10 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
+  if (process.env.ALLOW_PUBLIC_REGISTER !== 'true') {
+    return res.status(403).json({ error: 'Public registration is disabled. Ask an admin to create your account.' });
+  }
+
   const { error, value } = registerSchema.validate(req.body);
   if (error) return res.status(400).json({ error: error.details[0].message });
 

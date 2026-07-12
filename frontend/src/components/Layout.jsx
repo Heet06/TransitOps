@@ -15,15 +15,16 @@ export default function Layout() {
   const { user, logout } = useAuth();
 
   const navItems = [
-    { id: '/', label: 'Dashboard' },
-    { id: '/vehicles', label: 'Vehicle Registry' },
-    { id: '/drivers', label: 'Drivers & Safety Profiles' },
-    { id: '/trips', label: 'Trip Dispatching' },
-    { id: '/maintenance', label: 'Maintenance' },
-    { id: '/expenses', label: 'Fuel & Expense Management' },
-    { id: '/reports', label: 'Reports & Analytics' },
-    { id: '/settings', label: 'Settings & RBAC' },
+    { id: '/', label: 'Dashboard', roles: ['ADMIN', 'FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER', 'FINANCIAL_ANALYST', 'DRIVER'] },
+    { id: '/vehicles', label: 'Vehicle Registry', roles: ['ADMIN', 'FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER', 'FINANCIAL_ANALYST'] },
+    { id: '/drivers', label: 'Drivers & Safety Profiles', roles: ['ADMIN', 'FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER'] },
+    { id: '/trips', label: 'Trip Dispatching', roles: ['ADMIN', 'FLEET_MANAGER', 'DISPATCHER', 'DRIVER', 'FINANCIAL_ANALYST'] },
+    { id: '/maintenance', label: 'Maintenance', roles: ['ADMIN', 'FLEET_MANAGER', 'SAFETY_OFFICER', 'FINANCIAL_ANALYST'] },
+    { id: '/expenses', label: 'Fuel & Expense Management', roles: ['ADMIN', 'FLEET_MANAGER', 'FINANCIAL_ANALYST'] },
+    { id: '/reports', label: 'Reports & Analytics', roles: ['ADMIN', 'FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER', 'FINANCIAL_ANALYST'] },
+    { id: '/settings', label: 'Settings & RBAC', roles: ['ADMIN', 'FLEET_MANAGER'] },
   ];
+  const visibleNavItems = navItems.filter((item) => item.roles.includes(user?.role));
 
   return (
     <div className="container-fluid">
@@ -38,7 +39,7 @@ export default function Layout() {
                             </Link>
                             
                             <ul className="nav flex-column">
-                                {navItems.map((item) => (
+                                {visibleNavItems.map((item) => (
                                     <li className="nav-item" key={item.id}>
                                         <Link className={`nav-link ${location.pathname === item.id ? 'active fw-bold bg-light text-primary' : 'text-dark'}`} to={item.id}>
                                             {item.label}

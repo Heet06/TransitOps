@@ -22,8 +22,12 @@ export default function MaintenancePage() {
 
     const fetchLogs = async () => {
         try {
-            const res = await authFetch('/api/maintenance');
-            if (res.ok) setLogs(await res.json());
+            const [logRes, vehRes] = await Promise.all([
+                authFetch('/api/maintenance'),
+                authFetch('/api/vehicles'),
+            ]);
+            if (logRes.ok) setLogs(await logRes.json());
+            if (vehRes.ok) setVehicles(await vehRes.json());
         } catch (err) {
             console.error(err);
         }
@@ -57,7 +61,10 @@ export default function MaintenancePage() {
             const res = await authFetch('/api/maintenance', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    ...formData,
+                    cost: Number(formData.cost || 0),
+                })
             });
             const data = await res.json();
             if (!res.ok) {
@@ -109,7 +116,7 @@ export default function MaintenancePage() {
                                     <label className="form-label text-muted small fw-bold">Vehicle</label>
                                     <select className="form-select" name="vehicle_id" value={formData.vehicle_id} onChange={handleChange} required>
                                         <option value="">-- Select Vehicle --</option>
-                                        {vehicles.filter(v => v.status !== 'RETIRED').map(v => (
+                                        {vehicles.filter(v => v.status !== 'RETIRED' && v.status !== 'ON_TRIP').map(v => (
                                             <option key={v.vehicle_id} value={v.vehicle_id}>{v.registration_number} – {v.model_name}</option>
                                         ))}
                                     </select>

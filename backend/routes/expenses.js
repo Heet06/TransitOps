@@ -1,6 +1,7 @@
 const express = require('express');
 const Joi = require('joi');
 const { pool } = require('../db');
+const { sendDbError } = require('../utils/http');
 
 const router = express.Router();
 
@@ -40,7 +41,7 @@ router.get('/', async (req, res) => {
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
   }
 });
 
@@ -56,7 +57,24 @@ router.post('/', async (req, res) => {
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
+  }
+});
+
+router.put('/:id', async (req, res) => {
+  const { error, value } = expenseSchema.validate(req.body);
+  if (error) return res.status(400).json({ error: error.details[0].message });
+
+  try {
+    const result = await pool.query(
+      `UPDATE expenses SET vehicle_id=$1, trip_id=$2, expense_type=$3, amount=$4, expense_date=$5, notes=$6
+       WHERE expense_id=$7 RETURNING *`,
+      [value.vehicle_id, value.trip_id, value.expense_type, value.amount, value.expense_date, value.notes, req.params.id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Expense not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    sendDbError(res, err);
   }
 });
 
@@ -66,7 +84,7 @@ router.delete('/:id', async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'Expense not found' });
     res.json({ message: 'Expense deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendDbError(res, err);
   }
 });
 
