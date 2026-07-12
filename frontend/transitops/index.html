@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Home - Brand</title>
+    <script>
+        (function() {
+
+            // JavaScript snippet handling Dark/Light mode switching
+
+            const getStoredTheme = () => localStorage.getItem('theme');
+            const setStoredTheme = theme => localStorage.setItem('theme', theme);
+            const forcedTheme = document.documentElement.getAttribute('data-bss-forced-theme');
+
+            const getPreferredTheme = () => {
+
+                if (forcedTheme) return forcedTheme;
+
+                const storedTheme = getStoredTheme();
+                if (storedTheme) {
+                    return storedTheme;
+                }
+
+                const pageTheme = document.documentElement.getAttribute('data-bs-theme');
+
+                if (pageTheme) {
+                    return pageTheme;
+                }
+
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            const setTheme = theme => {
+                if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                } else {
+                    document.documentElement.setAttribute('data-bs-theme', theme);
+                }
+            }
+
+            setTheme(getPreferredTheme());
+
+            const showActiveTheme = (theme, focus = false) => {
+                const themeSwitchers = [].slice.call(document.querySelectorAll('.theme-switcher'));
+
+                if (!themeSwitchers.length) return;
+
+                document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
+                    element.classList.remove('active');
+                    element.setAttribute('aria-pressed', 'false');
+                });
+
+                const iconTheme = theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
+
+                for (const themeSwitcher of themeSwitchers) {
+
+                    const adaptIcon = !!themeSwitcher.dataset.bsAdaptIcon;
+
+                    if (adaptIcon) {
+                        const btnIcon = themeSwitcher.querySelector('[data-bss-adaptable]');
+
+                        try {
+                            const themeIcons = JSON.parse(themeSwitcher.dataset.bssIcons || "{}");
+                            const newIconMarkup = themeIcons[iconTheme];
+
+                            const template = document.createElement("template");
+                            template.innerHTML = newIconMarkup;
+
+                            const newIconFragment = template.content.cloneNode(true);
+
+                            if (newIconFragment?.children?.length) {
+                                newIconFragment.children[0].dataset.bssAdaptable = true;
+                            }
+
+                            btnIcon.replaceWith(newIconFragment);
+                        } catch (e) {}
+                    }
+
+                    const btnToActivate = themeSwitcher.querySelector('[data-bs-theme-value="' + theme + '"]');
+
+                    if (btnToActivate) {
+                        btnToActivate.classList.add('active');
+                        btnToActivate.setAttribute('aria-pressed', 'true');
+                    }
+                }
+            }
+
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                const storedTheme = getStoredTheme();
+                if (storedTheme !== 'light' && storedTheme !== 'dark') {
+                    setTheme(getPreferredTheme());
+                }
+            });
+
+            window.addEventListener('DOMContentLoaded', () => {
+                showActiveTheme(getPreferredTheme());
+
+                document.querySelectorAll('[data-bs-theme-value]')
+                    .forEach(toggle => {
+                        toggle.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const theme = toggle.getAttribute('data-bs-theme-value');
+                            setStoredTheme(theme);
+                            setTheme(theme);
+                            showActiveTheme(theme);
+                        })
+                    })
+            });
+        })();
+    </script>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Geist:400,700&amp;display=swap">
+    <link rel="stylesheet" href="assets/css/bss-overrides.css">
+    <link rel="stylesheet" href="assets/css/app-ui/file-storage.css">
+    <link rel="stylesheet" href="assets/css/app-ui/fitness-tracker.css">
+    <link rel="stylesheet" href="assets/css/app-ui/product-card.css">
+    <link rel="stylesheet" href="assets/css/app-ui/social-feed.css">
+    <link rel="stylesheet" href="assets/css/app-ui/wallet.css">
+    <link rel="stylesheet" href="assets/css/app-ui/weather-forecast.css">
+    <link rel="stylesheet" href="assets/css/sales-report.css">
+    <link rel="stylesheet" href="assets/css/template.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-md sticky-top bg-body py-3">
+        <div class="container"><a class="navbar-brand fs-5 fw-bold d-flex align-items-center" href="/"><svg class="bi bi-circle-square me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M0 6a6 6 0 1 1 12 0A6 6 0 0 1 0 6"></path>
+                    <path d="M12.93 5h1.57a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-1.57a7 7 0 0 1-1-.22v1.79A1.5 1.5 0 0 0 5.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 4h-1.79q.145.486.22 1"></path>
+                </svg>Brand</a><button class="navbar-toggler border-0" data-bs-toggle="collapse" data-bs-target="#navcol-1"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navcol-1">
+                <ul class="navbar-nav mb-4 mb-md-0 mx-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contacts.html">Contacts</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pricing.html">Pricing</a></li>
+                </ul>
+                <div class="theme-switcher dropdown me-3 mb-3 mb-md-0"><a class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" href="#"><svg class="bi bi-sun-fill mb-1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"></path>
+                        </svg></a>
+                    <div class="dropdown-menu"><a class="dropdown-item d-flex align-items-center" href="#" data-bs-theme-value="light"><svg class="bi bi-sun-fill me-2 opacity-50" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"></path>
+                            </svg>Light</a><a class="dropdown-item d-flex align-items-center" href="#" data-bs-theme-value="dark"><svg class="bi bi-moon-stars-fill me-2 opacity-50" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278"></path>
+                                <path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.73 1.73 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.73 1.73 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.73 1.73 0 0 0 1.097-1.097zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"></path>
+                            </svg>Dark</a><a class="dropdown-item d-flex align-items-center" href="#" data-bs-theme-value="auto"><svg class="bi bi-circle-half me-2 opacity-50" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 0 8 1zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16"></path>
+                            </svg>Auto</a></div>
+                </div><a class="btn btn-primary" role="button" href="/contacts.html">Sign in</a>
+            </div>
+        </div>
+    </nav>
+    <section class="py-4 py-md-5 bg-grid">
+        <div class="container px-md-4">
+            <div class="row mb-4">
+                <div class="col-md-8 col-xxl-6 text-center mx-auto"><span class="badge bg-light rounded-pill p-2 mb-3 px-3">Best App Template</span>
+                    <h1 class="display-5 fw-bold mb-3">Build Beautiful Web Apps with App Toolkit</h1>
+                    <p class="fs-5 mb-0 mx-auto">Eleifend placerat sed phasellus suspendisse, phasellus ultrices aliquam scelerisque. Proin vestibulum dui vehicula consectetur. Malesuada vestibulum etiam gravida faucibus.</p>
+                </div>
+            </div>
+            <div class="text-center mb-5 mx-auto">
+                <div class="d-flex flex-column justify-content-center gap-3 flex-sm-row"><a class="btn btn-primary btn-lg rounded-pill shadow-sm" role="button" href="#"> Start Free Trial <svg class="bi bi-arrow-right ms-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"></path>
+                        </svg></a><a class="btn btn-info btn-lg rounded-pill shadow-sm" role="button" href="#"> Book a Demo </a></div>
+                <div class="d-sm-flex justify-content-center gap-3 mt-3">
+                    <div><svg class="bi bi-check-lg text-success me-1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"></path>
+                        </svg><span>No credit card</span></div>
+                    <div><svg class="bi bi-check-lg text-success me-1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"></path>
+                        </svg><span>14-day trial</span></div>
+                    <div><svg class="bi bi-check-lg text-success me-1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"></path>
+                        </svg><span>Cancel anytime</span></div>
+                </div>
+            </div><img class="rounded-4 shadow-lg w-100 h-auto" alt="" src="assets/img/hero.webp">
+        </div>
+    </section>
+    <section class="pt-2 py-5">
+        <div class="container text-center"><small class="text-uppercase fw-bold d-block mb-4 mb-lg-4">Trusted by 3000+ companies</small>
+            <div class="row justify-content-center">
+                <div class="col col-lg-8 d-flex justify-content-center align-items-center flex-wrap gap-4"><a href="#"> <img src="assets/img/brands/adobe.svg" height="32" width="124"></a><a href="#"><img src="assets/img/brands/github.svg" height="28" width="116"></a><a href="#"><img src="assets/img/brands/google.svg" height="33" width="103"></a><a href="#"><img src="assets/img/brands/instagram.svg" height="36" width="126"></a><a href="#"><img src="assets/img/brands/microsoft.svg" height="27" width="132"></a><a href="#"><img src="assets/img/brands/spotify.svg" height="36" width="121"></a><a href="#"><img src="assets/img/brands/stripe.svg" height="33" width="81"></a></div>
+            </div>
+        </div>
+    </section>
+    <section class="bg-body-tertiary py-5" id="features">
+        <div class="container px-md-5">
+            <div class="row mb-4 mb-lg-5">
+                <div class="col-md-10 text-center mx-auto"><span class="badge bg-light rounded-pill p-2 mb-3 px-3">What We Offer</span>
+                    <h2 class="display-6 fw-bold">All Tools, One Platform</h2>
+                    <p class="fs-5 mx-auto">Lorem ipsum placerat sed phasellus suspendisse, phasellus ultrices aliquam scelerisque.</p>
+                </div>
+            </div>
+            <div class="row gy-4 row-cols-1 row-cols-sm-2 row-cols-lg-3">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="bg-light mb-3 icon-circle"><svg class="bi bi-lightning-fill text-info" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.454L6.823 9.5H3.5a.5.5 0 0 1-.48-.641z"></path>
+                                </svg></div>
+                            <h4 class="fw-bold mb-2">Smart Automation</h4>
+                            <p>Lorem ipsum placerat phasellus suspendisse, phasellus ultrices aliquam scelerisque.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="bg-light mb-3 icon-circle"><svg class="bi bi-pie-chart-fill text-info" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M15.985 8.5H8.207l-5.5 5.5a8 8 0 0 0 13.277-5.5zM2 13.292A8 8 0 0 1 7.5.015v7.778zM8.5.015V7.5h7.485A8 8 0 0 0 8.5.015"></path>
+                                </svg></div>
+                            <h4 class="fw-bold mb-2">Advanced Analytics</h4>
+                            <p>Lorem ipsum placerat phasellus suspendisse, phasellus ultrices aliquam scelerisque.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="bg-light mb-3 icon-circle"><svg class="bi bi-person-fill text-info" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"></path>
+                                </svg></div>
+                            <h4 class="fw-bold mb-2">Team Collaboration</h4>
+                            <p>Lorem ipsum placerat phasellus suspendisse, phasellus ultrices aliquam scelerisque.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="bg-light mb-3 icon-circle"><svg class="bi bi-lock-fill text-info" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M8 0a4 4 0 0 1 4 4v2.05a2.5 2.5 0 0 1 2 2.45v5a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 2 13.5v-5a2.5 2.5 0 0 1 2-2.45V4a4 4 0 0 1 4-4m0 1a3 3 0 0 0-3 3v2h6V4a3 3 0 0 0-3-3"></path>
+                                </svg></div>
+                            <h4 class="fw-bold mb-2">Enterprise Security</h4>
+                            <p>Lorem ipsum placerat phasellus suspendisse, phasellus ultrices aliquam scelerisque.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="bg-light mb-3 icon-circle"><svg class="bi bi-plug-fill text-info" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M6 0a.5.5 0 0 1 .5.5V3h3V.5a.5.5 0 0 1 1 0V3h1a.5.5 0 0 1 .5.5v3A3.5 3.5 0 0 1 8.5 10c-.002.434-.01.845-.04 1.22-.041.514-.126 1.003-.317 1.424a2.08 2.08 0 0 1-.97 1.028C6.725 13.9 6.169 14 5.5 14c-.998 0-1.61.33-1.974.718A1.92 1.92 0 0 0 3 16H2c0-.616.232-1.367.797-1.968C3.374 13.42 4.261 13 5.5 13c.581 0 .962-.088 1.218-.219.241-.123.4-.3.514-.55.121-.266.193-.621.23-1.09.027-.34.035-.718.037-1.141A3.5 3.5 0 0 1 4 6.5v-3a.5.5 0 0 1 .5-.5h1V.5A.5.5 0 0 1 6 0"></path>
+                                </svg></div>
+                            <h4 class="fw-bold mb-2">Flexible Integrations</h4>
+                            <p>Lorem ipsum placerat phasellus suspendisse, phasellus ultrices aliquam scelerisque.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="bg-light mb-3 icon-circle"><svg class="bi bi-headphones text-info" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M8 3a5 5 0 0 0-5 5v1h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a6 6 0 1 1 12 0v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1V8a5 5 0 0 0-5-5"></path>
+                                </svg></div>
+                            <h4 class="fw-bold mb-2">24/7 Support</h4>
+                            <p>Lorem ipsum placerat phasellus suspendisse, phasellus ultrices aliquam scelerisque.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-5">
+        <div class="container px-md-5">
+            <div class="row mb-4 mb-lg-5">
+                <div class="col-md-10 text-center mx-auto"><span class="badge bg-light rounded-pill p-2 mb-3 px-3">All-star Talent</span>
+                    <h2 class="display-6 fw-bold">Meet Our Team</h2>
+                    <p class="fs-5 mx-auto">Lorem ipsum placerat sed phasellus suspendisse, phasellus ultrices aliquam.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col col-xl-8 mx-auto">
+                    <div class="row row-cols-2 row-cols-md-3 mx-auto">
+                        <div class="mb-4">
+                            <div class="text-center"><img class="img-fluid aspect-ratio-1x1 object-fit-cover rounded mb-3" width="200" height="200" src="assets/img/team/avatar4.jpg">
+                                <h5 class="fw-bold mb-0"><strong>John Smith</strong></h5>
+                                <p class="text-muted mb-2">Erat netus</p>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="text-center"><img class="img-fluid aspect-ratio-1x1 object-fit-cover rounded mb-3" width="200" height="200" src="assets/img/team/avatar6.jpg">
+                                <h5 class="fw-bold mb-0"><strong>John Smith</strong></h5>
+                                <p class="text-muted mb-2">Erat netus</p>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="text-center"><img class="img-fluid aspect-ratio-1x1 object-fit-cover rounded mb-3" width="200" height="200" src="assets/img/team/avatar5.jpg">
+                                <h5 class="fw-bold mb-0"><strong>John Smith</strong></h5>
+                                <p class="text-muted mb-2">Erat netus</p>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="text-center"><img class="img-fluid aspect-ratio-1x1 object-fit-cover rounded mb-3" width="200" height="200" src="assets/img/team/avatar3.jpg">
+                                <h5 class="fw-bold mb-0"><strong>John Smith</strong></h5>
+                                <p class="text-muted mb-2">Erat netus</p>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="text-center"><img class="img-fluid aspect-ratio-1x1 object-fit-cover rounded mb-3" width="200" height="200" src="assets/img/team/avatar1.jpg">
+                                <h5 class="fw-bold mb-0"><strong>John Smith</strong></h5>
+                                <p class="text-muted mb-2">Erat netus</p>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="text-center"><img class="img-fluid aspect-ratio-1x1 object-fit-cover rounded mb-3" width="200" height="200" src="assets/img/team/avatar2.jpg">
+                                <h5 class="fw-bold mb-0"><strong>John Smith</strong></h5>
+                                <p class="text-muted mb-2">Erat netus</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="bg-body-tertiary py-5" id="testimonials">
+        <div class="container px-md-5">
+            <div class="row mb-4 mb-lg-5">
+                <div class="col-md-10 text-center mx-auto"><span class="badge bg-light rounded-pill p-2 mb-3 px-3">5000+ Raving Reviews</span>
+                    <h2 class="display-6 fw-bold">What Our Customers Say</h2>
+                    <p class="fs-5 mx-auto">Lorem ipsum placerat sed phasellus suspendisse, phasellus ultrices aliquam scelerisque.</p>
+                </div>
+            </div>
+            <div class="row gy-4 row-cols-1 row-cols-lg-2">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="text-warning d-flex align-items-center gap-1 mb-2"><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg></div>
+                            <p class="fs-5 mb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+                            <div class="d-flex align-items-center"><img class="img-fluid aspect-ratio-1x1 object-fit-cover rounded-circle me-2" width="50" height="50" src="assets/img/team/avatar2.jpg">
+                                <div><strong class="d-block">John Doe</strong><small class="text-muted d-block">Big Corp Inc</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="text-warning d-flex align-items-center gap-1 mb-2"><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg></div>
+                            <p class="fs-5 mb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+                            <div class="d-flex align-items-center"><img class="img-fluid aspect-ratio-1x1 object-fit-cover rounded-circle me-2" width="50" height="50" src="assets/img/team/avatar1.jpg">
+                                <div><strong class="d-block">Sydney Doe</strong><small class="text-muted d-block">Big Corp Inc</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="text-warning d-flex align-items-center gap-1 mb-2"><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg></div>
+                            <p class="fs-5 mb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+                            <div class="d-flex align-items-center"><img class="img-fluid aspect-ratio-1x1 object-fit-cover rounded-circle me-2" width="50" height="50" src="assets/img/team/avatar5.jpg">
+                                <div><strong class="d-block">Erica Doe</strong><small class="text-muted d-block">Big Corp Inc</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="text-warning d-flex align-items-center gap-1 mb-2"><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg><svg class="bi bi-star-fill" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
+                                </svg></div>
+                            <p class="fs-5 mb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+                            <div class="d-flex align-items-center"><img class="img-fluid aspect-ratio-1x1 object-fit-cover rounded-circle me-2" width="50" height="50" src="assets/img/team/avatar4.jpg">
+                                <div><strong class="d-block">Frank Doe</strong><small class="text-muted d-block">Big Corp Inc</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="bg-info py-3 py-sm-5">
+        <div class="container text-center text-md-start text-white my-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h3 class="display-6 fw-bold">Sign up for our newsletter</h3>
+                    <p class="mb-0"> Stay up to date with&nbsp;Brand and get&nbsp; exclusive discounts. </p>
+                </div>
+                <div class="col-md-6 mt-3 mt-md-0">
+                    <form class="d-flex" data-bs-theme="light">
+                        <div class="input-group input-group-lg"><span class="bg-white pe-1 input-group-text"><svg class="bi bi-envelope fs-5 text-body-tertiary" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"></path>
+                                </svg></span><input class="form-control ps-2 border-start-0" type="email" placeholder="Enter your email" required=""><button class="btn btn-dark" type="submit">Subscribe</button></div>
+                    </form><small class="d-block mt-2"> We care about the protection of your data. <a class="text-white" href="#">Read our Privacy Policy.</a></small>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer class="bg-body-tertiary py-5">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12 col-lg-6"><a class="text-decoration-none link-body-emphasis d-inline-flex align-items-center mb-2" href="#"><svg class="bi bi-circle-square fs-5 me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M0 6a6 6 0 1 1 12 0A6 6 0 0 1 0 6"></path>
+                            <path d="M12.93 5h1.57a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-1.57a7 7 0 0 1-1-.22v1.79A1.5 1.5 0 0 0 5.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 4h-1.79q.145.486.22 1"></path>
+                        </svg><span class="fs-5 fw-bold">Brand</span></a>
+                    <p class="text-muted mb-2">Lorem ipsum placerat sed phasellus suspendisse.</p>
+                    <div class="fs-5 d-flex justify-content-center align-items-center gap-2 justify-content-sm-start mb-4"><a class="link-body-emphasis" href="#"><svg class="icon icon-tabler icon-tabler-brand-instagram text-muted" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M4 4m0 4a4 4 0 0 1 4 -4h8a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-8a4 4 0 0 1 -4 -4z"></path>
+                                <path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"></path>
+                                <path d="M16.5 7.5l0 .01"></path>
+                            </svg></a><a class="link-body-emphasis" href="#"><svg class="icon icon-tabler icon-tabler-brand-x text-muted" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M4 4l11.733 16h4.267l-11.733 -16z"></path>
+                                <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path>
+                            </svg></a><a class="link-body-emphasis" href="#"><svg class="icon icon-tabler icon-tabler-brand-tiktok text-muted" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M21 7.917v4.034a9.948 9.948 0 0 1 -5 -1.951v4.5a6.5 6.5 0 1 1 -8 -6.326v4.326a2.5 2.5 0 1 0 4 2v-11.5h4.083a6.005 6.005 0 0 0 4.917 4.917z"></path>
+                            </svg></a></div>
+                </div>
+                <div class="col-6 col-sm col-xl-2">
+                    <h4 class="fw-bold h6">Product</h4>
+                    <ul class="list-unstyled">
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Pricing</a></li>
+                        <li><a href="#">Integrations</a></li>
+                        <li><a href="#">API</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-sm col-xl-2">
+                    <h4 class="fw-bold h6">Resources</h4>
+                    <ul class="list-unstyled">
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-sm col-xl-2">
+                    <h4 class="fw-bold h6">Company</h4>
+                    <ul class="list-unstyled">
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-light-subtle d-flex flex-column justify-content-between align-items-center flex-lg-row pt-4 border-top">
+                <p class="text-muted mb-2 mb-lg-0"><small>© 2026 Brand. All rights reserved.</small></p>
+                <div class="d-flex justify-content-center align-items-center flex-wrap justify-content-sm-start"><a class="link-body-emphasis mx-2" href="#">Privacy Policy</a><a class="link-body-emphasis mx-2" href="#">Terms of Service</a><a class="link-body-emphasis mx-2" href="#">Cookie Policy</a></div>
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/bs-init.js"></script>
+</body>
+
+</html>

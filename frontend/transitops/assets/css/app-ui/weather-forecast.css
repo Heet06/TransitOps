@@ -1,0 +1,48 @@
+/* Gradient background for weather card header */
+
+.weather-card-header {
+  background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* Decorative background effect */
+
+.weather-card-header::after {
+  content: "";
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  filter: blur(20px);
+}
+
+/* Drop shadow for large weather icon */
+
+.weather-icon-lg {
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.1));
+}
+
+/* Hover transition for forecast items */
+
+.forecast-item {
+  min-width: 80px;
+  transition: all 0.2s ease;
+}
+
+.forecast-item:hover {
+  background: var(--bs-tertiary-bg);
+  transform: translateY(-3px);
+}
+
+/* Hide scrollbar for forecast scroll */
+
+.forecast-scroll {
+  scrollbar-width: none;
+}
+
+.forecast-scroll::-webkit-scrollbar {
+  display: none;
+}
+

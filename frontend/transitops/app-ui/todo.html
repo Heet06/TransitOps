@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Untitled</title>
+    <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Geist:400,700&amp;display=swap">
+    <link rel="stylesheet" href="../assets/css/bss-overrides.css">
+    <link rel="stylesheet" href="../assets/css/app-ui/file-storage.css">
+    <link rel="stylesheet" href="../assets/css/app-ui/fitness-tracker.css">
+    <link rel="stylesheet" href="../assets/css/app-ui/product-card.css">
+    <link rel="stylesheet" href="../assets/css/app-ui/social-feed.css">
+    <link rel="stylesheet" href="../assets/css/app-ui/wallet.css">
+    <link rel="stylesheet" href="../assets/css/app-ui/weather-forecast.css">
+    <link rel="stylesheet" href="../assets/css/sales-report.css">
+    <link rel="stylesheet" href="../assets/css/template.css">
+</head>
+
+<body>
+    <section class="bg-body-tertiary">
+        <div class="container d-flex min-vh-100 flex-column justify-content-center align-items-center py-5"><a class="text-decoration-none link-body-emphasis d-inline-flex align-items-center mb-4" href="#"><svg class="bi bi-circle-square me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M0 6a6 6 0 1 1 12 0A6 6 0 0 1 0 6"></path>
+                    <path d="M12.93 5h1.57a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-1.57a7 7 0 0 1-1-.22v1.79A1.5 1.5 0 0 0 5.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 4h-1.79q.145.486.22 1"></path>
+                </svg><span class="fs-5 fw-bold">Brand</span></a>
+            <div class="card w-100 max-w-400">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1 class="fs-4 fw-semibold mb-0">My Tasks</h1><button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#addTodoModal">+ Add Todo</button>
+                    </div>
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-start mb-1">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="todo1"><label class="form-check-label fw-medium" for="todo1">Complete project documentation</label></div><span class="badge text-bg-warning">High</span>
+                            </div>
+                            <p class="small text-muted mb-1">Finish writing the technical documentation for the new feature</p><small class="text-muted">Due: Feb 10, 2026 • Work</small>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-start mb-1">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="todo2"><label class="form-check-label fw-medium" for="todo2">Buy groceries</label></div><span class="badge text-bg-info">Medium</span>
+                            </div>
+                            <p class="small text-muted mb-1">Milk, eggs, bread, vegetables</p><small class="text-muted">Due: Feb 7, 2026 • Shopping</small>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-start mb-1">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" checked="" id="todo3"><label class="form-check-label text-decoration-line-through text-muted fw-medium" for="todo3">Morning workout</label></div><span class="badge text-bg-secondary">Low</span>
+                            </div>
+                            <p class="small text-muted mb-1">30 minutes cardio and stretching</p><small class="text-muted">Due: Feb 6, 2026 • Health</small>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-start mb-1">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="todo4"><label class="form-check-label fw-medium" for="todo4">Schedule meeting</label></div><span class="badge text-bg-info">Medium</span>
+                            </div>
+                            <p class="small text-muted mb-1">Schedule team meeting</p><small class="text-muted">Due: Feb 8, 2026 • Personal</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" role="dialog" tabindex="-1" id="addTodoModal" aria-labelledby="addTodoModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document" data-bss-id="45045">
+                    <div class="modal-content" data-bss-id="45046">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addTodoModalLabel">Create New Task</h5><button class="btn-close" aria-label="Close" data-bs-dismiss="modal" type="button"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form>
+                                <div class="mb-3"><label class="form-label small fw-medium" for="taskName">Task Name</label><input class="form-control" type="text" id="taskName" name="taskName" placeholder="Enter task name" required=""></div>
+                                <div class="mb-3"><label class="form-label small fw-medium" for="taskDescription">Description</label><textarea class="form-control" id="taskDescription" name="taskDescription" placeholder="Add task details..." rows="3"></textarea></div>
+                                <div class="mb-3"><label class="form-label small fw-medium" for="dueDate">Due Date</label><input class="form-control" id="dueDate" name="dueDate" type="date"></div>
+                                <div class="mb-3"><label class="form-label small fw-medium" for="priority">Priority</label><select class="form-select" id="priority" name="priority">
+                                        <option value="low">Low</option>
+                                        <option value="medium" selected="">Medium</option>
+                                        <option value="high">High</option>
+                                    </select></div>
+                                <div class="mb-3"><label class="form-label small fw-medium" for="category">Category</label><select class="form-select" id="category" name="category">
+                                        <option value="personal">Personal</option>
+                                        <option value="work">Work</option>
+                                        <option value="shopping">Shopping</option>
+                                        <option value="health">Health</option>
+                                        <option value="other">Other</option>
+                                    </select></div>
+                            </form>
+                        </div>
+                        <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button><button class="btn btn-primary" type="button">Add Task</button></div>
+                    </div>
+                </div>
+            </div>
+            <div class="small text-center text-muted mt-3"><span> By clicking continue, you agree to our </span><a href="#">Terms of Service</a><span> and </span><a href="#">Privacy Policy</a><span>. </span></div>
+        </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/bs-init.js"></script>
+</body>
+
+</html>

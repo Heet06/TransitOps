@@ -1,0 +1,46 @@
+/* Progress ring animation */
+
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.35s;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* Stat card hover effect */
+
+.stat-card {
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  background-color: var(--bs-tertiary-bg) !important;
+}
+
+/* Chart bars */
+
+.chart-bar {
+  flex: 1;
+  background-color: var(--bs-primary-bg-subtle);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.5s ease;
+  position: relative;
+}
+
+.chart-bar.active {
+  background-color: var(--bs-primary);
+}
+
+.chart-bar:hover::after {
+  content: attr(data-value);
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  background: var(--bs-dark);
+  color: white;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+

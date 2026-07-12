@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Dashboard - Brand</title>
+    <script>
+        (function() {
+
+            // JavaScript snippet handling Dark/Light mode switching
+
+            const getStoredTheme = () => localStorage.getItem('theme');
+            const setStoredTheme = theme => localStorage.setItem('theme', theme);
+            const forcedTheme = document.documentElement.getAttribute('data-bss-forced-theme');
+
+            const getPreferredTheme = () => {
+
+                if (forcedTheme) return forcedTheme;
+
+                const storedTheme = getStoredTheme();
+                if (storedTheme) {
+                    return storedTheme;
+                }
+
+                const pageTheme = document.documentElement.getAttribute('data-bs-theme');
+
+                if (pageTheme) {
+                    return pageTheme;
+                }
+
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            const setTheme = theme => {
+                if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                } else {
+                    document.documentElement.setAttribute('data-bs-theme', theme);
+                }
+            }
+
+            setTheme(getPreferredTheme());
+
+            const showActiveTheme = (theme, focus = false) => {
+                const themeSwitchers = [].slice.call(document.querySelectorAll('.theme-switcher'));
+
+                if (!themeSwitchers.length) return;
+
+                document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
+                    element.classList.remove('active');
+                    element.setAttribute('aria-pressed', 'false');
+                });
+
+                const iconTheme = theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
+
+                for (const themeSwitcher of themeSwitchers) {
+
+                    const adaptIcon = !!themeSwitcher.dataset.bsAdaptIcon;
+
+                    if (adaptIcon) {
+                        const btnIcon = themeSwitcher.querySelector('[data-bss-adaptable]');
+
+                        try {
+                            const themeIcons = JSON.parse(themeSwitcher.dataset.bssIcons || "{}");
+                            const newIconMarkup = themeIcons[iconTheme];
+
+                            const template = document.createElement("template");
+                            template.innerHTML = newIconMarkup;
+
+                            const newIconFragment = template.content.cloneNode(true);
+
+                            if (newIconFragment?.children?.length) {
+                                newIconFragment.children[0].dataset.bssAdaptable = true;
+                            }
+
+                            btnIcon.replaceWith(newIconFragment);
+                        } catch (e) {}
+                    }
+
+                    const btnToActivate = themeSwitcher.querySelector('[data-bs-theme-value="' + theme + '"]');
+
+                    if (btnToActivate) {
+                        btnToActivate.classList.add('active');
+                        btnToActivate.setAttribute('aria-pressed', 'true');
+                    }
+                }
+            }
+
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                const storedTheme = getStoredTheme();
+                if (storedTheme !== 'light' && storedTheme !== 'dark') {
+                    setTheme(getPreferredTheme());
+                }
+            });
+
+            window.addEventListener('DOMContentLoaded', () => {
+                showActiveTheme(getPreferredTheme());
+
+                document.querySelectorAll('[data-bs-theme-value]')
+                    .forEach(toggle => {
+                        toggle.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const theme = toggle.getAttribute('data-bs-theme-value');
+                            setStoredTheme(theme);
+                            setTheme(theme);
+                            showActiveTheme(theme);
+                        })
+                    })
+            });
+        })();
+    </script>
+    <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Geist:400,700&amp;display=swap">
+    <link rel="stylesheet" href="../assets/css/bss-overrides.css">
+    <link rel="stylesheet" href="../assets/css/app-ui/file-storage.css">
+    <link rel="stylesheet" href="../assets/css/app-ui/fitness-tracker.css">
+    <link rel="stylesheet" href="../assets/css/app-ui/product-card.css">
+    <link rel="stylesheet" href="../assets/css/app-ui/social-feed.css">
+    <link rel="stylesheet" href="../assets/css/app-ui/wallet.css">
+    <link rel="stylesheet" href="../assets/css/app-ui/weather-forecast.css">
+    <link rel="stylesheet" href="../assets/css/sales-report.css">
+    <link rel="stylesheet" href="../assets/css/template.css">
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row min-vh-100">
+            <div class="col bg-body p-0 px-md-2">
+                <div class="offcanvas-md offcanvas-end sticky-md-top" tabindex="-1" id="sidebar">
+                    <div class="offcanvas-body position-relative flex-column"><button class="btn-close position-absolute top-0 end-0 d-md-none m-4" type="button" aria-label="Close" data-bs-dismiss="offcanvas" data-bs-target="#sidebar"></button>
+                        <div class="w-100 pt-3"><a class="text-decoration-none link-body-emphasis d-inline-flex align-items-center ms-3" href="#"><svg class="bi bi-circle-square fs-5 me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M0 6a6 6 0 1 1 12 0A6 6 0 0 1 0 6"></path>
+                                    <path d="M12.93 5h1.57a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-1.57a7 7 0 0 1-1-.22v1.79A1.5 1.5 0 0 0 5.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 4h-1.79q.145.486.22 1"></path>
+                                </svg><span class="fs-5 fw-bold">Brand</span></a><a class="btn btn-primary d-flex justify-content-center align-items-center m-3" role="button"><svg class="bi bi-plus-circle-fill me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"></path>
+                                </svg>Quick Create </a>
+                            <ul class="nav flex-column">
+                                <li class="nav-item"><a class="nav-link" href="#"><svg class="bi bi-speedometer2 me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 4a.5.5 0 0 1 .5.5V6a.5.5 0 0 1-1 0V4.5A.5.5 0 0 1 8 4M3.732 5.732a.5.5 0 0 1 .707 0l.915.914a.5.5 0 1 1-.708.708l-.914-.915a.5.5 0 0 1 0-.707M2 10a.5.5 0 0 1 .5-.5h1.586a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 10m9.5 0a.5.5 0 0 1 .5-.5h1.5a.5.5 0 0 1 0 1H12a.5.5 0 0 1-.5-.5m.754-4.246a.39.39 0 0 0-.527-.02L7.547 9.31a.91.91 0 1 0 1.302 1.258l3.434-4.297a.39.39 0 0 0-.029-.518z"></path>
+                                            <path fill-rule="evenodd" d="M0 10a8 8 0 1 1 15.547 2.661c-.442 1.253-1.845 1.602-2.932 1.25C11.309 13.488 9.475 13 8 13c-1.474 0-3.31.488-4.615.911-1.087.352-2.49.003-2.932-1.25A8 8 0 0 1 0 10m8-7a7 7 0 0 0-6.603 9.329c.203.575.923.876 1.68.63C4.397 12.533 6.358 12 8 12s3.604.532 4.923.96c.757.245 1.477-.056 1.68-.631A7 7 0 0 0 8 3"></path>
+                                        </svg>Dashboard </a></li>
+                                <li class="nav-item"><a class="nav-link" href="#"><svg class="bi bi-list-task me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M2 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5V3a.5.5 0 0 0-.5-.5zM3 3H2v1h1z"></path>
+                                            <path d="M5 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M5.5 7a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1zm0 4a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1z"></path>
+                                            <path fill-rule="evenodd" d="M1.5 7a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H2a.5.5 0 0 1-.5-.5zM2 7h1v1H2zm0 3.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm1 .5H2v1h1z"></path>
+                                        </svg>Lifecycle<span class="badge bg-success shadow-sm position-absolute end-0 ms-auto me-3">22</span></a></li>
+                                <li class="nav-item"><a class="nav-link" href="#"><svg class="bi bi-bar-chart me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M4 11H2v3h2zm5-4H7v7h2zm5-5v12h-2V2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z"></path>
+                                        </svg>Analytics </a></li>
+                                <li class="nav-item"><a class="nav-link" href="#"><svg class="bi bi-folder me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139q.323-.119.684-.12h5.396z"></path>
+                                        </svg>Projects </a></li>
+                                <li class="nav-item"><a class="nav-link" href="#"><svg class="bi bi-people me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"></path>
+                                        </svg>Team </a></li>
+                            </ul>
+                            <div class="mt-4">
+                                <h6 class="small text-muted ps-3">Documents</h6>
+                                <ul class="nav flex-column">
+                                    <li class="nav-item"><a class="nav-link" href="#"><svg class="bi bi-database me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M4.318 2.687C5.234 2.271 6.536 2 8 2s2.766.27 3.682.687C12.644 3.125 13 3.627 13 4c0 .374-.356.875-1.318 1.313C10.766 5.729 9.464 6 8 6s-2.766-.27-3.682-.687C3.356 4.875 3 4.373 3 4c0-.374.356-.875 1.318-1.313M13 5.698V7c0 .374-.356.875-1.318 1.313C10.766 8.729 9.464 9 8 9s-2.766-.27-3.682-.687C3.356 7.875 3 7.373 3 7V5.698c.271.202.58.378.904.525C4.978 6.711 6.427 7 8 7s3.022-.289 4.096-.777A5 5 0 0 0 13 5.698M14 4c0-1.007-.875-1.755-1.904-2.223C11.022 1.289 9.573 1 8 1s-3.022.289-4.096.777C2.875 2.245 2 2.993 2 4v9c0 1.007.875 1.755 1.904 2.223C4.978 15.71 6.427 16 8 16s3.022-.289 4.096-.777C13.125 14.755 14 14.007 14 13zm-1 4.698V10c0 .374-.356.875-1.318 1.313C10.766 11.729 9.464 12 8 12s-2.766-.27-3.682-.687C3.356 10.875 3 10.373 3 10V8.698c.271.202.58.378.904.525C4.978 9.71 6.427 10 8 10s3.022-.289 4.096-.777A5 5 0 0 0 13 8.698m0 3V13c0 .374-.356.875-1.318 1.313C10.766 14.729 9.464 15 8 15s-2.766-.27-3.682-.687C3.356 13.875 3 13.373 3 13v-1.302c.271.202.58.378.904.525C4.978 12.71 6.427 13 8 13s3.022-.289 4.096-.777c.324-.147.633-.323.904-.525"></path>
+                                            </svg>Data Library </a></li>
+                                    <li class="nav-item">
+                                        <div><a class="btn btn-link text-decoration-none d-flex justify-content-between align-items-center px-3" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapse-1" href="#collapse-1"><span><svg class="bi bi-file-text me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                        <path d="M5 4a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1zm-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5M5 8a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1zm0 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1z"></path>
+                                                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1"></path>
+                                                    </svg>Reports </span><svg class="bi bi-chevron-right arrow" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"></path>
+                                                </svg></a>
+                                            <div class="collapse" id="collapse-1">
+                                                <ul class="nav ms-3">
+                                                    <li class="nav-item w-100"><a class="nav-link" href="#"><svg class="bi bi-calendar me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"></path>
+                                                            </svg>Recent Orders </a></li>
+                                                    <li class="nav-item w-100"><a class="nav-link" href="#"><svg class="bi bi-ticket me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                                <path d="M0 4.5A1.5 1.5 0 0 1 1.5 3h13A1.5 1.5 0 0 1 16 4.5V6a.5.5 0 0 1-.5.5 1.5 1.5 0 0 0 0 3 .5.5 0 0 1 .5.5v1.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 11.5V10a.5.5 0 0 1 .5-.5 1.5 1.5 0 1 0 0-3A.5.5 0 0 1 0 6zM1.5 4a.5.5 0 0 0-.5.5v1.05a2.5 2.5 0 0 1 0 4.9v1.05a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-1.05a2.5 2.5 0 0 1 0-4.9V4.5a.5.5 0 0 0-.5-.5z"></path>
+                                                            </svg>Coupons </a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><svg class="bi bi-gear me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"></path>
+                                                <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"></path>
+                                            </svg>Settings </a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><svg class="bi bi-question-circle me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"></path>
+                                                <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286m1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94"></path>
+                                            </svg>Get Help </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9 col-xl-10 bg-body-tertiary px-0">
+                <div class="d-md-none p-2 sticky-top">
+                    <nav class="navbar bg-body rounded-4 shadow-sm px-2">
+                        <div class="container-fluid"><a class="text-decoration-none link-body-emphasis d-inline-flex align-items-center" href="#"><svg class="bi bi-circle-square fs-5 me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M0 6a6 6 0 1 1 12 0A6 6 0 0 1 0 6"></path>
+                                    <path d="M12.93 5h1.57a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-1.57a7 7 0 0 1-1-.22v1.79A1.5 1.5 0 0 0 5.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 4h-1.79q.145.486.22 1"></path>
+                                </svg><span class="fs-5 fw-bold">Brand</span></a><button class="navbar-toggler border-0" data-bs-toggle="offcanvas" data-bs-target="#sidebar"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button></div>
+                    </nav>
+                </div>
+                <main class="min-vh-100 px-3 px-md-4">
+                    <div class="d-flex flex-column justify-content-between flex-xl-row-reverse align-items-xl-start pt-3 mb-3 border-bottom">
+                        <div class="d-flex align-items-center mb-3 mb-xl-0">
+                            <form class="position-relative flex-grow-1 me-1"><input class="form-control pe-4" type="search" placeholder="Search" name="search"><button class="btn border-0 position-absolute top-50 end-0 translate-middle-y" type="submit"><svg class="bi bi-search" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"></path>
+                                    </svg></button></form>
+                            <div class="theme-switcher dropdown" data-bs-adapt-icon="true" data-bss-icons="{&quot;light&quot;:&quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; width=\&quot;1em\&quot; height=\&quot;1em\&quot; fill=\&quot;currentColor\&quot; class=\&quot;bi bi-sun-fill\&quot; viewBox=\&quot;0 0 16 16\&quot;>\n  <path d=\&quot;M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z\&quot;/>\n</svg>&quot;,&quot;dark&quot;:&quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; width=\&quot;1em\&quot; height=\&quot;1em\&quot; fill=\&quot;currentColor\&quot; class=\&quot;bi bi-moon-stars-fill\&quot; viewBox=\&quot;0 0 16 16\&quot;>\n  <path d=\&quot;M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278\&quot;/>\n  <path d=\&quot;M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L13.863.1z\&quot;/>\n</svg>&quot;}"><button class="btn btn-link dropdown-toggle px-2" data-bs-toggle="dropdown" aria-expanded="false" type="button"><svg class="bi bi-sun-fill mb-1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" data-bss-adaptable="true">
+                                        <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"></path>
+                                    </svg></button>
+                                <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item d-flex align-items-center" href="#" data-bs-theme-value="light"><svg class="bi bi-sun-fill me-2 opacity-50" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"></path>
+                                        </svg>Light </a><a class="dropdown-item d-flex align-items-center" href="#" data-bs-theme-value="dark"><svg class="bi bi-moon-stars-fill me-2 opacity-50" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278"></path>
+                                            <path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.73 1.73 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.73 1.73 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.73 1.73 0 0 0 1.097-1.097zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"></path>
+                                        </svg>Dark </a><a class="dropdown-item d-flex align-items-center" href="#" data-bs-theme-value="auto"><svg class="bi bi-circle-half me-2 opacity-50" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 0 8 1zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16"></path>
+                                        </svg>Auto </a></div>
+                            </div>
+                            <div class="dropdown"><button class="btn dropdown-toggle border-0 p-2" data-bs-toggle="dropdown" aria-expanded="false" type="button"><img class="object-fit-cover border rounded-circle" src="../assets/img/team/avatar2.jpg" width="32" height="32"></button>
+                                <div class="dropdown-menu dropdown-menu-end shadow"><a class="dropdown-item" href="#"><svg class="bi bi-person me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"></path>
+                                        </svg>&nbsp;Profile </a><a class="dropdown-item" href="#"><svg class="bi bi-gear me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"></path>
+                                            <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"></path>
+                                        </svg>&nbsp;Settings </a><a class="dropdown-item" href="#"><svg class="bi bi-list-nested me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M4.5 11.5A.5.5 0 0 1 5 11h10a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5m-2-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m-2-4A.5.5 0 0 1 1 3h10a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5"></path>
+                                        </svg>&nbsp;Activity log </a>
+                                    <div class="dropdown-divider"></div><a class="dropdown-item link-danger" href="#"><svg class="bi bi-box-arrow-right me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"></path>
+                                            <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"></path>
+                                        </svg>&nbsp;Logout </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="#"><span>Home</span></a></li>
+                                <li class="breadcrumb-item"><a href="#"><span>Examples</span></a></li>
+                                <li class="breadcrumb-item"><a href="#"><span>Projects</span></a></li>
+                                <li class="breadcrumb-item active"><span>Website Redesign</span></li>
+                            </ol>
+                            <h1 class="h2">Website Redesign Project</h1>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                                            <div>
+                                                <h3 class="fw-bold mb-2">Project Status</h3>
+                                                <p class="text-muted mb-3">Complete redesign of the company website with modern UI/UX principles and improved performance.</p>
+                                                <div class="d-flex flex-wrap gap-2"><span class="badge bg-info d-inline-flex gap-1"><svg class="icon icon-tabler icon-tabler-loader" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                            <path d="M12 6l0 -3"></path>
+                                                            <path d="M16.25 7.75l2.15 -2.15"></path>
+                                                            <path d="M18 12l3 0"></path>
+                                                            <path d="M16.25 16.25l2.15 2.15"></path>
+                                                            <path d="M12 18l0 3"></path>
+                                                            <path d="M7.75 16.25l-2.15 2.15"></path>
+                                                            <path d="M6 12l-3 0"></path>
+                                                            <path d="M7.75 7.75l-2.15 -2.15"></path>
+                                                        </svg>&nbsp;In Progress</span><span class="badge bg-light">High Priority</span><span class="badge bg-light">Marketing Team</span></div>
+                                            </div>
+                                            <div class="d-flex gap-2"><button class="btn btn-outline-primary" type="button"> Edit </button><button class="btn btn-primary" type="button"> Mark Complete </button></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-xl-3 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-body-secondary rounded-3 d-flex justify-content-center align-items-center size-30"><svg class="bi bi-currency-dollar" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                        <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73z"></path>
+                                                    </svg></div>
+                                            </div>
+                                            <div class="ms-3">
+                                                <div class="small text-muted"><span>Budget</span></div>
+                                                <div class="fw-bold mb-0 h5"><span>$25,000</span></div><small class="text-success">$18,500 spent</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-xl-3 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-success bg-opacity-10 rounded-3 d-flex justify-content-center align-items-center size-30"><svg class="icon icon-tabler icon-tabler-trending-up" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                        <path d="M3 17l6 -6l4 4l8 -8"></path>
+                                                        <path d="M14 7l7 0l0 7"></path>
+                                                    </svg></div>
+                                            </div>
+                                            <div class="ms-3">
+                                                <div class="small text-muted"><span>Progress</span></div>
+                                                <div class="fw-bold mb-0 h5"><span>68%</span></div><small class="text-muted">24 of 35 tasks</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-xl-3 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-warning bg-opacity-10 rounded-3 d-flex justify-content-center align-items-center size-30"><svg class="icon icon-tabler icon-tabler-calendar-filled" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                        <path d="M16 2a1 1 0 0 1 .993 .883l.007 .117v1h1a3 3 0 0 1 2.995 2.824l.005 .176v12a3 3 0 0 1 -2.824 2.995l-.176 .005h-12a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-12a3 3 0 0 1 2.824 -2.995l.176 -.005h1v-1a1 1 0 0 1 1.993 -.117l.007 .117v1h6v-1a1 1 0 0 1 1 -1zm3 7h-14v9.625c0 .705 .386 1.286 .883 1.366l.117 .009h12c.513 0 .936 -.53 .993 -1.215l.007 -.16v-9.625z" stroke-width="0" fill="currentColor"></path>
+                                                        <path d="M12 12a1 1 0 0 1 .993 .883l.007 .117v3a1 1 0 0 1 -1.993 .117l-.007 -.117v-2a1 1 0 0 1 -.117 -1.993l.117 -.007h1z" stroke-width="0" fill="currentColor"></path>
+                                                    </svg></div>
+                                            </div>
+                                            <div class="ms-3">
+                                                <div class="small text-muted"><span>Due Date</span></div>
+                                                <div class="fw-bold mb-0 h5"><span>Mar 15</span></div><small class="text-muted">38 days left</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-xl-3 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-info bg-opacity-10 rounded-3 d-flex justify-content-center align-items-center size-30"><svg class="icon icon-tabler icon-tabler-users" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                        <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
+                                                        <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
+                                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                                        <path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path>
+                                                    </svg></div>
+                                            </div>
+                                            <div class="ms-3">
+                                                <div class="small text-muted"><span>Team Size</span></div>
+                                                <div class="fw-bold mb-0 h5"><span>8 Members</span></div><small class="text-muted">2 external</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-8 mb-4">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="fw-bold mb-0">Project Progress</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-2"><span>Overall Completion</span><span class="fw-bold">68%</span></div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" style="width: 68%;"><span class="visually-hidden">68%</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-2"><span>Design Phase</span><span class="fw-bold">100%</span></div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-info" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"><span class="visually-hidden">100%</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-2"><span>Development</span><span class="fw-bold">75%</span></div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-dark" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 75%;"><span class="visually-hidden">75%</span></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="d-flex justify-content-between mb-2"><span>Testing &amp; QA</span><span class="fw-bold">30%</span></div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-warning" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" style="width: 30%;"><span class="visually-hidden">30%</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="fw-bold mb-0">Recent Tasks</h5><button class="btn btn-primary btn-sm" type="button"> Add Task </button>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="list-group list-group-flush">
+                                            <div class="px-0 list-group-item">
+                                                <div class="d-flex align-items-start"><input class="me-3 mt-1 form-check-input" type="checkbox" checked="">
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex justify-content-between align-items-start">
+                                                            <div>
+                                                                <div class="fw-bold text-decoration-line-through text-muted"><span>Design homepage mockup</span></div><small class="text-muted">Completed by Sarah Johnson</small>
+                                                            </div><span class="badge bg-light d-inline-flex gap-1"><svg class="bi bi-check-circle-fill text-success" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"></path>
+                                                                </svg>&nbsp;Done</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="px-0 list-group-item">
+                                                <div class="d-flex align-items-start"><input class="me-3 mt-1 form-check-input" type="checkbox">
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex justify-content-between align-items-start">
+                                                            <div>
+                                                                <div class="fw-bold"><span>Implement responsive navigation</span></div><small class="text-muted">Assigned to Mike Chen</small>
+                                                            </div><span class="badge bg-light d-inline-flex gap-1"><svg class="icon icon-tabler icon-tabler-loader" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                                    <path d="M12 6l0 -3"></path>
+                                                                    <path d="M16.25 7.75l2.15 -2.15"></path>
+                                                                    <path d="M18 12l3 0"></path>
+                                                                    <path d="M16.25 16.25l2.15 2.15"></path>
+                                                                    <path d="M12 18l0 3"></path>
+                                                                    <path d="M7.75 16.25l-2.15 2.15"></path>
+                                                                    <path d="M6 12l-3 0"></path>
+                                                                    <path d="M7.75 7.75l-2.15 -2.15"></path>
+                                                                </svg>&nbsp;In Progress</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="px-0 list-group-item">
+                                                <div class="d-flex align-items-start"><input class="me-3 mt-1 form-check-input" type="checkbox">
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex justify-content-between align-items-start">
+                                                            <div>
+                                                                <div class="fw-bold"><span>Setup contact form backend</span></div><small class="text-muted">Assigned to David Lee</small>
+                                                            </div><span class="badge bg-light d-inline-flex gap-1"><svg class="icon icon-tabler icon-tabler-loader" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                                    <path d="M12 6l0 -3"></path>
+                                                                    <path d="M16.25 7.75l2.15 -2.15"></path>
+                                                                    <path d="M18 12l3 0"></path>
+                                                                    <path d="M16.25 16.25l2.15 2.15"></path>
+                                                                    <path d="M12 18l0 3"></path>
+                                                                    <path d="M7.75 16.25l-2.15 2.15"></path>
+                                                                    <path d="M6 12l-3 0"></path>
+                                                                    <path d="M7.75 7.75l-2.15 -2.15"></path>
+                                                                </svg>To Do</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="px-0 list-group-item">
+                                                <div class="d-flex align-items-start"><input class="me-3 mt-1 form-check-input" type="checkbox" checked="">
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex justify-content-between align-items-start">
+                                                            <div>
+                                                                <div class="fw-bold text-decoration-line-through text-muted"><span>Create style guide</span></div><small class="text-muted">Completed by Emma Wilson</small>
+                                                            </div><span class="badge bg-light d-inline-flex gap-1"><svg class="bi bi-check-circle-fill text-success" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"></path>
+                                                                </svg>&nbsp;Done</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="px-0 list-group-item">
+                                                <div class="d-flex align-items-start"><input class="me-3 mt-1 form-check-input" type="checkbox">
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex justify-content-between align-items-start">
+                                                            <div>
+                                                                <div class="fw-bold"><span>Performance optimization</span></div><small class="text-muted">Due in 5 days</small>
+                                                            </div><span class="badge bg-light d-inline-flex gap-1"><svg class="bi bi-exclamation-circle-fill text-danger" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"></path>
+                                                                </svg>&nbsp;Urgent</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-4 mb-4">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="fw-bold mb-0">Project Details</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3"><small class="text-muted d-block">Project Manager</small>
+                                            <div class="d-flex align-items-center mt-2"><img class="object-fit-cover rounded-circle me-2" src="../assets/img/team/avatar1.jpg" width="32" height="32" alt="Manager">
+                                                <div>
+                                                    <div class="fw-bold"><span>Sarah Johnson</span></div><small class="text-muted">sarah.j@company.com</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="mb-3"><small class="text-muted d-block">Start Date</small>
+                                            <div class="fw-bold mt-1"><span>January 5, 2026</span></div>
+                                        </div>
+                                        <div class="mb-3"><small class="text-muted d-block">End Date</small>
+                                            <div class="fw-bold mt-1"><span>March 15, 2026</span></div>
+                                        </div>
+                                        <div class="mb-3"><small class="text-muted d-block">Client</small>
+                                            <div class="fw-bold mt-1"><span>Internal Project</span></div>
+                                        </div>
+                                        <div><small class="text-muted d-block">Department</small>
+                                            <div class="fw-bold mt-1"><span>Marketing</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card mb-4">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="fw-bold mb-0">Team Members</h5><button class="btn btn-primary btn-sm" type="button"><svg class="bi bi-plus-lg" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"></path>
+                                            </svg></button>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="list-group list-group-flush">
+                                            <div class="px-0 py-2 list-group-item">
+                                                <div class="d-flex align-items-center"><img class="object-fit-cover rounded-circle me-3" src="../assets/img/team/avatar1.jpg" width="40" height="40" alt="Team member">
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-bold"><span>Sarah Johnson</span></div><small class="text-muted">Project Manager</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="px-0 py-2 list-group-item">
+                                                <div class="d-flex align-items-center"><img class="object-fit-cover rounded-circle me-3" src="../assets/img/team/avatar2.jpg" width="40" height="40" alt="Team member">
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-bold"><span>Mike Chen</span></div><small class="text-muted">Lead Developer</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="px-0 py-2 list-group-item">
+                                                <div class="d-flex align-items-center"><img class="object-fit-cover rounded-circle me-3" src="../assets/img/team/avatar3.jpg" width="40" height="40" alt="Team member">
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-bold"><span>Emma Wilson</span></div><small class="text-muted">UI/UX Designer</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="px-0 py-2 list-group-item">
+                                                <div class="d-flex align-items-center"><img class="object-fit-cover rounded-circle me-3" src="../assets/img/team/avatar4.jpg" width="40" height="40" alt="Team member">
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-bold"><span>David Lee</span></div><small class="text-muted">Backend Developer</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="px-0 py-2 list-group-item">
+                                                <div class="d-flex align-items-center"><img class="object-fit-cover rounded-circle me-3" src="../assets/img/team/avatar5.jpg" width="40" height="40" alt="Team member">
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-bold"><span>Lisa Martinez</span></div><small class="text-muted">QA Tester</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="fw-bold mb-0">Recent Activity</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div>
+                                            <div class="d-flex mb-3">
+                                                <div class="flex-shrink-0">
+                                                    <div class="bg-success rounded-circle d-flex justify-content-center align-items-center size-30"><svg class="bi bi-check-lg fs-5 text-white" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"></path>
+                                                        </svg></div>
+                                                </div>
+                                                <div class="ms-3">
+                                                    <div class="fw-bold"><span>Task completed</span></div><small class="text-muted">Design homepage mockup</small>
+                                                    <div class="small text-muted"><span>2 hours ago</span></div>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex mb-3">
+                                                <div class="flex-shrink-0">
+                                                    <div class="bg-primary rounded-circle d-flex justify-content-center align-items-center size-30"><svg class="bi bi-chat-square-dots fs-5 text-white" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                                            <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2.5a2 2 0 0 0-1.6.8L8 14.333 6.1 11.8a2 2 0 0 0-1.6-.8H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"></path>
+                                                            <path d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"></path>
+                                                        </svg></div>
+                                                </div>
+                                                <div class="ms-3">
+                                                    <div class="fw-bold"><span>New comment</span></div><small class="text-muted">Mike added feedback on navigation</small>
+                                                    <div class="small text-muted"><span>5 hours ago</span></div>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex mb-3">
+                                                <div class="flex-shrink-0">
+                                                    <div class="bg-info rounded-circle d-flex justify-content-center align-items-center size-30"><svg class="icon icon-tabler icon-tabler-pencil fs-5 text-white" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                            <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"></path>
+                                                            <path d="M13.5 6.5l4 4"></path>
+                                                        </svg></div>
+                                                </div>
+                                                <div class="ms-3">
+                                                    <div class="fw-bold"><span>File uploaded</span></div><small class="text-muted">style-guide.pdf</small>
+                                                    <div class="small text-muted"><span>Yesterday</span></div>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex">
+                                                <div class="flex-shrink-0">
+                                                    <div class="bg-warning rounded-circle d-flex justify-content-center align-items-center size-30"><svg class="icon icon-tabler icon-tabler-brand-zoom fs-5 text-white" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                            <path d="M17.011 9.385v5.128l3.989 3.487v-12z"></path>
+                                                            <path d="M3.887 6h10.08c1.468 0 3.033 1.203 3.033 2.803v8.196a.991 .991 0 0 1 -.975 1h-10.373c-1.667 0 -2.652 -1.5 -2.652 -3l.01 -8a.882 .882 0 0 1 .208 -.71a.841 .841 0 0 1 .67 -.287z"></path>
+                                                        </svg></div>
+                                                </div>
+                                                <div class="ms-3">
+                                                    <div class="fw-bold"><span>Meeting scheduled</span></div><small class="text-muted">Design review on Feb 10</small>
+                                                    <div class="small text-muted"><span>2 days ago</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="text-center py-5"><a class="text-decoration-none link-body-emphasis d-inline-flex align-items-center mb-2" href="#"><svg class="bi bi-circle-square fs-5 me-2" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M0 6a6 6 0 1 1 12 0A6 6 0 0 1 0 6"></path>
+                                <path d="M12.93 5h1.57a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-1.57a7 7 0 0 1-1-.22v1.79A1.5 1.5 0 0 0 5.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 4h-1.79q.145.486.22 1"></path>
+                            </svg><span class="fs-5 fw-bold">Brand</span></a>
+                        <div class="d-flex justify-content-center align-items-center flex-wrap mb-2"><a class="link-body-emphasis mx-2" href="#">Privacy Policy</a><a class="link-body-emphasis mx-2" href="#">Terms of Service</a><a class="link-body-emphasis mx-2" href="#">Cookie Policy</a></div>
+                        <p class="text-muted mb-2">© 2026 Brand. All rights reserved.</p>
+                        <div class="fs-4 d-flex justify-content-center align-items-center gap-2 mb-2"><a class="link-body-emphasis" href="#"><svg class="icon icon-tabler icon-tabler-brand-instagram text-muted" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M4 4m0 4a4 4 0 0 1 4 -4h8a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-8a4 4 0 0 1 -4 -4z"></path>
+                                    <path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"></path>
+                                    <path d="M16.5 7.5l0 .01"></path>
+                                </svg></a><a class="link-body-emphasis" href="#"><svg class="icon icon-tabler icon-tabler-brand-x text-muted" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M4 4l11.733 16h4.267l-11.733 -16z"></path>
+                                    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path>
+                                </svg></a><a class="link-body-emphasis" href="#"><svg class="icon icon-tabler icon-tabler-brand-tiktok text-muted" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M21 7.917v4.034a9.948 9.948 0 0 1 -5 -1.951v4.5a6.5 6.5 0 1 1 -8 -6.326v4.326a2.5 2.5 0 1 0 4 2v-11.5h4.083a6.005 6.005 0 0 0 4.917 4.917z"></path>
+                                </svg></a></div>
+                    </footer>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/bs-init.js"></script>
+</body>
+
+</html>

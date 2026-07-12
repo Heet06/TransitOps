@@ -1,0 +1,63 @@
+/* Card hover effects */
+
+.product-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Product image zoom effect */
+
+.product-img {
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-img {
+  transform: scale(1.05);
+}
+
+/* Badge overlay positioning */
+
+.badge-overlay {
+  z-index: 10;
+}
+
+/* Wishlist button */
+
+.btn-wishlist {
+  z-index: 10;
+  background: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  color: var(--bs-secondary);
+  transition: all 0.2s;
+}
+
+.btn-wishlist:hover {
+  color: var(--bs-danger);
+  transform: scale(1.1);
+}
+
+/* Color swatches */
+
+.color-swatch {
+  background-color: #212529;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px #dee2e6;
+}
+
+.color-swatch.active {
+  box-shadow: 0 0 0 2px var(--bs-primary) !important;
+}
+

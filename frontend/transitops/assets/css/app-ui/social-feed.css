@@ -1,0 +1,9 @@
+.btn-social {
+  transition: background-color 0.2s;
+}
+
+.btn-social:hover {
+  background-color: var(--bs-tertiary-bg);
+  color: var(--bs-body-color) !important;
+}
+
